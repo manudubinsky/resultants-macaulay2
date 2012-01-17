@@ -732,7 +732,7 @@ document {
 	
 	TT "Resultants", " is a package for elimination theory, emphasizing universal formulas, in particular, resultant computations.",
 	
-	PARA {}, "The package contains an implementation for computing determinant of free graded complexes, called ", TO2((detComplex), "detComplex"), ", with several derived methods:  ", TO2((listDetComplex), "listDetComplex"),", ", TO2((mapsComplex), "mapsComplex"),", and  ", TO2((minorsComplex), "minorsComplex"), ". This provides a method for producing universal formulas for any family of schemes, just by combining the ", TO2 {(resolution,Ideal),"resolution(Ideal)"}, " method with detComplex. In Section 2 determinants of free resolutions are treated, as well as a few examples. We recommend to see [Dem84, Jou95, GKZ94, Bus06] for more details on determinants of complexes in elimination theory.",
+	PARA {}, "The package contains an implementation for computing determinant of free graded complexes, called ", TO2((detComplex), "detComplex"), ", with several derived methods:  ", TO2((listDetComplex), "listDetComplex"),", ", TO2((mapsComplex), "mapsComplex"),", and  ", TO2((minorsComplex), "minorsComplex"), ". This provides a method for producing universal formulas for any family of schemes, just by combining the ", TO2 {(resolution,Ideal),"resolution(Ideal)"}, " method with  ", TO2((detComplex), "detComplex"), ". In Section 2 determinants of free resolutions are treated, as well as a few examples. We recommend to see [Dem84, Jou95, GKZ94, Bus06] for more details on determinants of complexes in elimination theory.",
 
 	PARA {}, "The package also provides methods for computing matrices and formulas for different resultants applicable on different families of polynomials, such as the Macaulay resultant (", TO2((macRes), "macRes"),") for generic homogeneous polynomials; residual resultant (", TO2((ciRes), "ciRes"),", ", TO2((cm2Res), "cm2Res"),") for generic polynomials having a non empty base locus scheme; determinantal resultant (", TO2((detRes), "detRes"),") for generic polynomial matrices of a given generic rank. Those resultants and their implementation are reviewed in Section 3 and for the theory behind the author can refer to [Jou91, Cha93, GKZ94, Jou95, Jou97, CLO98, BEM01, Bus01b, Bus06, Bus04].",
 
@@ -1430,6 +1430,150 @@ document {
 	SeeAlso => {macaulayFormula, macRes,ciRes, ciResDeg, cm2Res, bezoutianMatrix}
      
 }
+
+
+
+------------------------ \ documentation maxCol / ------------------------
+
+document {
+	Key => "maxCol",
+	Headline => "Returns a submatrix form by a maximal set of linear independent columns.",
+	Usage => " MM = maxCol(Mat)",
+	Inputs => {
+		"Mat" => Matrix
+	},
+	Outputs => {
+		"MM" => Matrix,
+		"cols" => List
+	},
+	PARA {}, " From a given m x n - Matrix of rank r, ", TO maxCol, " returns a submatrix 'MM' form by a maximal set of linear independent columns, and the list of columns 'cols' chosen.",
+
+	EXAMPLE { 
+		" M = matrix {{1,2,3},{1,2,3},{4,5,6},{4,5,6}}",
+		" maxCol M;"},
+
+	PARA {}, "NOTE: because of the necessity of ", TO rank," the base field need to be QQ for doing generic evaluation. If not, one gets the message: expected an affine ring (consider Generic=>true to work over QQ).",
+
+	EXAMPLE {
+		" R=QQ[a..g]",
+		" M = matrix {{a,a,b},{c,c,d},{e,e,f},{g,g,g}}",
+		" maxCol M"},
+
+	SeeAlso => {maxMinor, rank, maxColNum, rankNum, maxMinorNum}
+
+}
+
+------------------------ \ documentation maxMinor / ------------------------
+
+document {
+	Key => "maxMinor",
+	Headline => "Returns a maximal minor of the matrix of full rank.",
+	Usage => " MM = maxMinor(Mat)",
+	Inputs => {
+		"Mat" => Matrix
+	},
+	Outputs => {
+		"MM" => Matrix
+	},
+	PARA {}, " From a given m x n - Matrix of rank r, ", TO maxMinor, " returns an r x r full rank Matrix. This method uses twice the method ", TO maxCol," by transposing twice.",
+	
+	EXAMPLE { 
+		" M = matrix {{1,2,3},{1,2,3},{4,5,6},{4,5,6}}",
+		" maxMinor M"},
+
+	PARA {}, "NOTE: because of the necessity of ", TO rank," the base field need to be QQ for doing generic evaluation. If not, one gets the message: expected an affine ring (consider Generic=>true to work over QQ).",
+
+	EXAMPLE {
+		" R=QQ[a..g]",
+		" M = matrix {{a,a,b},{c,c,d},{e,e,f},{g,g,g}}",
+		" maxMinor M"},
+
+	SeeAlso => {maxCol, rank, maxColNum, rankNum, maxMinorNum}
+}
+
+------------------------ \ documentation maxColNum / ------------------------
+
+document {
+	Key => "maxColNum",
+	Headline => "Returns a submatrix form by a maximal set of linear independent columns by random evaluation.",
+	Usage => " MM = maxColNum(Mat)",
+	Inputs => {
+		"Mat" => Matrix
+	},
+	Outputs => {
+		"MM" => Matrix,
+		"cols" => List
+	},
+	PARA {}, " Same as ", TO maxCol, ", but uses ", TO rankNum, " for numerical rank computation",
+
+	EXAMPLE { 
+		" M = matrix {{1,2,3},{1,2,3},{4,5,6},{4,5,6}}",
+		" maxColNum M"},
+	
+	PARA {}, "NOTE: because of the necessity of ", TO rank," the base field need to be QQ for doing generic evaluation. If not, one gets the message: expected an affine ring (consider Generic=>true to work over QQ).",
+	
+	EXAMPLE {
+		" R=QQ[a..g]",
+		" M = matrix {{a,a,b},{c,c,d},{e,e,f},{g,g,g}}",
+		" maxColNum M"},
+
+	SeeAlso => {maxCol, maxMinor, rank, rankNum, maxMinorNum}
+
+}
+
+------------------------ \ documentation maxMinorNum / ------------------------
+
+document {
+	Key => "maxMinorNum",
+	Headline => "Returns a maximal minor of the matrix of full rank by random evaluation.",
+	Usage => " MM = maxMinorNum(Mat)",
+	Inputs => {
+		"Mat" => Matrix
+	},
+	Outputs => {
+		"MM" => Matrix
+	},
+	PARA {}, " Same as ", TO maxMinor, ", but uses ", TO rankNum, " for numerical rank computation",
+	
+	EXAMPLE { 
+		" M = matrix {{1,2,3},{1,2,3},{4,5,6},{4,5,6}}",
+		" maxMinorNum M"},
+
+	PARA {}, "NOTE: because of the necessity of ", TO rank," the base field need to be QQ for doing generic evaluation. If not, one gets the message: expected an affine ring (consider Generic=>true to work over QQ).",
+	
+	EXAMPLE {
+		" R=QQ[a..g]",
+		" M = matrix {{a,a,b},{c,c,d},{e,e,f},{g,g,g}}",
+		" maxMinorNum M"},
+
+	SeeAlso => {maxMinor, maxCol, rank, maxColNum, rankNum}
+}
+
+------------------------ \ documentation rankNum / ------------------------
+
+document {
+	Key => "rankNum",
+	Headline => "computes the rank of a matrix by random evaluation.",
+	Usage => " MM = rankNum(Mat)",
+	Inputs => {
+		"Mat" => Matrix
+	},
+	Outputs => {
+		"MM" => Matrix
+	},
+	PARA {}, " Same as ", TO rank, ", but uses ", TO random, " for numerical rank computation",
+	
+	PARA {}, "NOTE: because of the necessity of ", TO rank," the base field need to be QQ for doing generic evaluation. If not, one gets the message: expected an affine ring (consider Generic=>true to work over QQ).",
+
+	EXAMPLE {
+		" R=QQ[a..g]",
+		" M = matrix {{a,a,b},{c,c,d},{e,e,f},{g,g,g}}",
+		" rankNum M"},
+
+	SeeAlso => {rank, random, maxColNum, maxMinorNum}
+}
+
+
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
