@@ -740,7 +740,7 @@ document {
 
 	PARA {}, BOLD "Bibliography:", 
 
-	PARA {}, "[BBD12] ", ITALIC "Nicolás Botbol, Laurent Busé and Manuel Dubinsky. ", HREF("http://mate.dm.uba.ar/~nbotbol/pdfs/JSAG-elimination.pdf", " PDF"), ". Package for elimination theory in Macaulay2 (2012).",
+	PARA {}, "[BBD12] ", ITALIC "Nicolás Botbol, Laurent Busé and Manuel Dubinsky. ", HREF("http://mate.dm.uba.ar/~nbotbol/pdfs/ResultantsM2.pdf", " PDF"), ". Package for elimination theory in Macaulay2 (2012).",
 
     PARA {}, "[BEM00] ", ITALIC "Laurent Busé, Mohamed Elkadi and Bernard Mourrain",", Generalized resultants over unirational algebraic varieties, J. Symbolic Comput. 29 (2000), no. 4-5, 515–526.", 
 
