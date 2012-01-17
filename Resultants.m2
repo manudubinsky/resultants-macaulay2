@@ -15,13 +15,13 @@ newPackage("Resultants",
    )
 
 export {
-    matrixToListByColumns,
-    matrixToListByRows,
-    RankNum,
-    MaxCol,
-    MaxColNum,
-    MaxMinor,
-    MaxMinorNum,
+--    matrixToListByColumns,
+--    matrixToListByRows,
+    rankNum,
+    maxCol,
+    maxColNum,
+    maxMinor,
+    maxMinorNum,
 -- MAIN FUNCTIONS
 	degHomPolMap,
 	listDetComplex,
@@ -47,7 +47,7 @@ export {
 --## Basic functions ###################################################
 --######################################################################
 
--- Functions that end with 'num' (RankNum, MaxColNum, MaxMinorNum, listDetComplexNum, minorsComplexNum and detComplexNum) are numerical functions, meaning that it does the same computation than the non-num function but after a random evaluation.
+-- Functions that end with 'num' (rankNum, maxColNum, maxMinorNum, listDetComplexNum, minorsComplexNum and detComplexNum) are numerical functions, meaning that it does the same computation than the non-num function but after a random evaluation.
 -- It is perhaps recommendable to run them at least twice.
 
 ---------------------------------------------------------------------------
@@ -141,8 +141,8 @@ listComplement(List, List) := (l1, l2) -> (
 -- PURPOSE : it returns the rank of a matrix obtained after specialization 
 -- of the variables. With high probability, this is the rank of the input matrix.
 
-RankNum = method();
-RankNum(Matrix) := (M) -> (
+rankNum = method();
+rankNum(Matrix) := (M) -> (
      Aring:=ring M;
      l:={};
      i:=0;
@@ -164,8 +164,8 @@ RankNum(Matrix) := (M) -> (
 --   INPUT : 'M' an m x n - Matrix of rank r
 --  OUTPUT : 'N' an m x r - Matrix of rank r
 
-MaxCol = method();
-MaxCol(Matrix) := (M) -> (
+maxCol = method();
+maxCol(Matrix) := (M) -> (
         rm:=rank(M);
         i:=0;
         c:={};
@@ -180,8 +180,8 @@ MaxCol(Matrix) := (M) -> (
 
 -- alternative with a specialization of the variables -- to gain in time computation
 
-MaxColNum = method();
-MaxColNum(Matrix) := (M) -> (
+maxColNum = method();
+maxColNum(Matrix) := (M) -> (
      Aring:=ring M;
      l:={};
      i:=0;
@@ -204,18 +204,18 @@ MaxColNum(Matrix) := (M) -> (
 --   INPUT : 'M' an m x n - Matrix of rank r
 --  OUTPUT : 'N' an r x r - Matrix of rank r
 
-MaxMinor = method();
-MaxMinor (Matrix) := (M) -> (
-        --Apply two times MaxCol to obtain a maximal minor
+maxMinor = method();
+maxMinor (Matrix) := (M) -> (
+        --Apply two times maxCol to obtain a maximal minor
         --This is not very efficient...      
-        return (transpose (MaxCol(transpose (MaxCol(M))_0 ))_0 )
+        return (transpose (maxCol(transpose (maxCol(M))_0 ))_0 )
 );
 
 -- alternative with a specialization of the variables -- to gain in time computation
 
-MaxMinorNum = method();
-MaxMinorNum (Matrix) := (M) -> (
-        return (transpose (MaxCol(transpose (MaxCol(M))_0 ))_0 )
+maxMinorNum = method();
+maxMinorNum (Matrix) := (M) -> (
+        return (transpose (maxCol(transpose (maxCol(M))_0 ))_0 )
 );
 
 ---------------------------------------------------------------------------
@@ -331,7 +331,7 @@ minorsComplex(ChainComplex, List, ZZ) := (complex, var, d) -> (
 		complList = listComplement(toList(0..(rank target m) - 1),  columnList);
 		m = (transpose(m))_complList;
 		m = transpose(m);
-		columnList = (MaxCol m)_1;
+		columnList = (maxCol m)_1;
 		minList = minList | {(m_columnList)};
 	);
 	return minList
@@ -350,7 +350,7 @@ minorsComplexNum(ChainComplex, List, ZZ) := (complex, var, d) -> (
 		complList = listComplement(toList(0..(rank target m) - 1),  columnList);
 		m = (transpose(m))_complList;
 		m = transpose(m);
-		columnList = (MaxColNum m)_1;
+		columnList = (maxColNum m)_1;
 		minList = minList | {(m_columnList)};
 	);
 	return minList
@@ -371,7 +371,7 @@ listDetComplex(ChainComplex, List, ZZ) := (complex, var, d) -> (
 		complList = listComplement(toList(0..(rank target m) - 1),  columnList);
 		m = (transpose(m))_complList;
 		m = transpose(m);
-		columnList = (MaxCol m)_1;
+		columnList = (maxCol m)_1;
 		detList = detList | {determinant(m_columnList)};
 		targetShifts = sourceShifts(complex.dd_i,targetShifts,var);
 	);
@@ -391,7 +391,7 @@ listDetComplexNum(ChainComplex, List, ZZ) := (complex, var, d) -> (
 		complList = listComplement(toList(0..(rank target m) - 1),  columnList);
 		m = (transpose(m))_complList;
 		m = transpose(m);
-		columnList = (MaxColNum m)_1;
+		columnList = (maxColNum m)_1;
 		detList = detList | {determinant(m_columnList)};
 		targetShifts = sourceShifts(complex.dd_i,targetShifts,var);
 	);
@@ -562,7 +562,7 @@ ciRes= (g, H, var) -> (
   --df:={}; for i from 0 to m-1 do (df=df|{pdeg(var,f_(0,i))_0});
   bm:=subsets(0..m-1,ng); nbm:=#bm; --base of minors
   for i from 0 to nbm-1 do (f=f|det(H_(bm_i)));--add minors to f
-  return(degHomPolMap(f,var,(sum df) - m + 1 - (m - ng + 1)*(min dg)))
+  return((degHomPolMap(f,var,(sum df) - m + 1 - (m - ng + 1)*(min dg)))_1)
 );
 
 -- PURPOSE: similar than ciRes but return the critical degree in which the resultant is computed
@@ -648,7 +648,7 @@ cm2Res= (g, H, var) -> (
   f:=g*H; --the polynomials f1,..,fm
   df:=pdeg(f,var);
   S:= syz  g; --first syzygy of G with Hilbert-Burch theorem
-  return(degHomPolMap(gens minors(n,S|H),var,(sum df) - 2*(min dg + 1)))
+  return((degHomPolMap(gens minors(n,S|H),var,(sum df) - 2*(min dg + 1)))_1)
 );
  
 --######################################################################
@@ -668,8 +668,8 @@ detRes=(p,r,var) -> (
    dp:=pdeg(p^{n-1},var);--degrees of last row
    dc:=pdeg(transpose(p_{0}),var); --degree of first column
    dk:=sort(apply(dc, i->dp#0-i));
-   return(degHomPolMap(gens(minors(r+1,p)),var,
-   (n-r)*(sum dp - sum dk)-(m-n)*(sum dk_{0..n-r-1})-(m-r)*(n-r)+1))
+   return((degHomPolMap(gens(minors(r+1,p)),var,
+   (n-r)*(sum dp - sum dk)-(m-n)*(sum dk_{0..n-r-1})-(m-r)*(n-r)+1)))_1
 );
 
 -- PURPOSE : this function calculates the critical degree and that partial degrees of 
@@ -881,7 +881,7 @@ document {
 
 	PARA {}, "This function calculates the maps of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree.",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list 'varList' as variables.",
-	PARA {}, "It is recomended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
 
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
 		" f1 = a*x^2+b*x*y+c*y^2 ",
@@ -923,7 +923,7 @@ document {
 
 	PARA {}, "This function calculates some minors of the maps of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree.",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list 'varList' as variables.",
-	PARA {}, "It is recomended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
 	
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
 		" f1 = a*x^2+b*x*y+c*y^2 ",
@@ -966,7 +966,7 @@ document {
 	PARA {}, "This function calculates some minors of the maps of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree.",
 	PARA {}, " The choice of the minors is according to the construction of the determinant of a complex.",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list 'varList' as variables.",
-	PARA {}, "It is recomended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
 	PARA {},"This function uses the same algorithm to uses to 'listDetComplex' but uses  numerical rank computation instead of exact rank computation.",
 
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
@@ -1010,7 +1010,7 @@ document {
 
 	PARA {}, "This function calculates the list with the determinants of some minors of the maps of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree. Precisely, this list corresponds to the list with the determinant polynomials of the maps computed by 'minorsComplex'.",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list 'varList' as variables.",
-	PARA {}, "It is recomended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
 	
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
 		" f1 = a*x^2+b*x*y+c*y^2 ",
@@ -1051,7 +1051,7 @@ document {
 
 	PARA {}, "This function calculates the list with the determinants of some minors of the maps of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree. Precisely, this list corresponds to the list with the determinant polynomials of the maps computed by 'minorsComplex'.",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list 'varList' as variables.",
-	PARA {}, "It is recomended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
 	PARA {}, "It uses the same algorithm to uses to 'listDetComplex' but uses  numerical rank computation instead of exact rank computation.",
 
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
@@ -1094,7 +1094,7 @@ document {
 
 	PARA {}, "This function calculates the determinant of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree. It corresponds to the alternate product of the elements in the list 'listDetComplex'",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list 'varList' as variables.",
-	PARA {}, "It is recomended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
 	
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
 		" f1 = a*x^2+b*x*y+c*y^2 ",
@@ -1137,7 +1137,7 @@ document {
 
 	PARA {}, "This function calculates the determinant of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree. It corresponds to the alternate product of the elements in the list 'listDetComplexNum'.",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list 'varList' as variables.",
-	PARA {}, "It is recomended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see 'flattenRing' for passing from R=QQ[x,y][a,b,c] to QQ[x,y,a,b,c].",
 	PARA {}, "It uses the same algorithm to uses to 'listDetComplex' but uses  numerical rank computation instead of exact rank computation.",
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
 		" f1 = a*x^2+b*x*y+c*y^2 ",
@@ -1265,28 +1265,172 @@ document {
 
 	Inputs => {
 		"aSingleRowMatrix" => Matrix => {"a single row matrix describing the base locus"},
-		"Matrix" => Matrix => {"a matrix corresping to the decomposition of a polynomial system over the base locus"},
+		"Matrix" => Matrix => {"a matrix corresponding to the decomposition of a polynomial system over the base locus"},
 		"varList" => List => {"list 'var' of variables with respect to which the polynomials are homogeneous and from which one wants to remove these variables"},
 	},
 	Outputs => {
 		"aMatrix" => Matrix => {"a matrix corresponding to the residual resultant"}
 	},
 
-	PARA {}, "Let R be a polynomial ring in two groups of variables R=S[X1,...,Xr] and S=k[a1,...,as]. Here, X1,...,Xr ar called 'var' and a1,...,as are called 'coefficients'. Let m be a line matrix [f1,...,fn], where fi is an element of R which is homogeneous as polynomial the variables 'var' of positive.",
-
-	PARA {}, "This function returns two matrices whose ratio of their determinants is the Macaulay resultant of f1,...,fn providing the second one has a nonzero determinant. This extraneous factor depends on the order of the polynomials, so that it could be helpful to change this order depending on the computations made",
+	PARA {}, " This function basically computes the matrix of the first application in the resolution of (I:J) given in the article of Bruns, Kustin and Miller: 'The resolution of the generic residual intersection of a complete intersection', Journal of Algebra 128.",
+	
+	PARA {}, "The first argument is a list of homogeneous polynomials J=(g1,..,gm) forming a complete intersection with respect to the variables 'varList'. Given a system of homogeneous I=(f1,..,fn), such that I is included in J and (I:J) is a residual intersection, one wants to to compute a sort of resultant of (I:J). The second argument is the matrix M such that I=J.M. The output is a generically (with respect to the other variables than 'varList') surjective matrix such that the 
+determinant of a maximal minor is a multiple of the resultant of I on the closure of the complementary of V(J) in V(I). Such a minor can be obtain with ", TO2((maxMinor),"maxMinor"), " and ", TO2((maxMinorNum),"maxMinorNum"),".",
 
 
 	EXAMPLE {" R=QQ[a_0,a_1,a_2,a_3,a_4,b_0,b_1,b_2,b_3,b_4,c_0,c_1,c_2,c_3,c_4,x,y,z]", 
 	"G=matrix{{z,x^2+y^2}}", 
 	"H=matrix{{a_0*z+a_1*x+a_2*y,b_0*z+b_1*x+b_2*y,c_0*z+c_1*x+c_2*y},{a_3,b_3,c_3}}",
 	"L=ciRes(G,H,{x,y,z})",
-	"MaxCol L_1"
+	"maxCol L"
 		},
      
-	SeeAlso => {macaulayFormula, macRes}
+	SeeAlso => {macaulayFormula, macRes,cm2Res, bezoutianMatrix}
      
 }
+
+
+------------------------ \ ciResDeg / ------------------------
+document {
+     	Key => {ciResDeg},
+	Headline => "compute a regularity index and partial degrees of the residual resultant over a complete intersection",
+	Usage => " ciRes(List, List)",
+
+	Inputs => {
+		"List" => List => {"a list of element in the ambient ring corresponding to the degrees of a system of polynomials d1,...,dn"},
+		"List" => List => {"a list of element in the ambient ring corresponding to the degrees of a complete intersection k1,...,km, where m<n"},
+	},
+	Outputs => {
+		"List" => List => {"a list of element consisting of a regularity index and partial degree of homogeneity"}
+	},
+
+	PARA {}, " Given a system of polynomials f0,...,fn of degree d0,...,dn that are contained in a complete intersection g1,...,gm of degree k1,...,km, this function returns the regularity index used to form the matrix associated to the residual resultant over a complete intersection and then all the partial degree of this resultant with respect to the coefficients of f0,f1,..,fn.",
+
+
+	EXAMPLE {" R=ZZ[d_0..d_3,k_1,k_2]",
+	"L=ciResDeg({d_0,d_1,d_2,d_3},{k_1,k_2})", 
+		},
+     
+	SeeAlso => {ciRes,ciResDegGH}
+     
+}
+
+------------------------ \ ciResDegGH / ------------------------
+document {
+     	Key => {ciResDegGH},
+	Headline => "compute a regularity index used for the residual resultant over a complete intersection",
+	Usage => " ciResDegGH(aSingleRowMatrix, Matrix, varList)",
+
+	Inputs => {
+		"aSingleRowMatrix" => Matrix => {"a single row matrix describing the base locus"},
+		"Matrix" => Matrix => {"a matrix corresponding to the decomposition of a polynomial system over the base locus"},
+		"varList" => List => {"list 'var' of variables with respect to which the polynomials are homogeneous and from which one wants to remove these variables"},
+	},
+	Outputs => {
+		"Integer" => ZZ => {"a regularity index to form the residual resultant-"}
+	},
+
+	PARA {}, " This function is similar to the first element in the list returned by the function ", TO2(ciResDeg,"ciResDeg")," but with arguments that are identical to the ones used with the function ", TO2(ciRes,"ciRes"), ".",
+
+	EXAMPLE {" R=QQ[a_0,a_1,a_2,a_3,a_4,b_0,b_1,b_2,b_3,b_4,c_0,c_1,c_2,c_3,c_4,x,y,z]", 
+	"G=matrix{{z,x^2+y^2}}", 
+	"H=matrix{{a_0*z+a_1*x+a_2*y,b_0*z+b_1*x+b_2*y,c_0*z+c_1*x+c_2*y},{a_3,b_3,c_3}}",
+	"ciResDegGH(G,H,{x,y,z})",
+		},
+     
+	SeeAlso => {ciRes,ciResDeg}
+     
+}
+
+
+------------------------ \ cm2Res / ------------------------
+document {
+     	Key => {cm2Res},
+	Headline => "returns a matrix corresponding to the residual resultant over a Cohen-Macaulay codimension 2 base locus",
+	Usage => " ciRes(aSingleRowMatrix, Matrix, varList)",
+
+	Inputs => {
+		"Matrix" => Matrix => {"a single row matrix describing the base locus"},
+		"Matrix" => Matrix => {"a matrix corresponding to the decomposition of a polynomial system over the base locus"},
+		"varList" => List => {"list 'var' of variables with respect to which the polynomials are homogeneous and from which one wants to remove these variables"},
+	},
+	Outputs => {
+		"aMatrix" => Matrix => {"a matrix corresponding to the residual resultant"}
+	},
+
+	PARA {}, " Suppose given a homogeneous ideal l.c.i. CM codim 2 J=(g1,..,gn), such that I=(f1,..,fm) is included in J and (I:J) is a residual intersection. Let H be the matrix that I=J.H. Let R be the matrixof the first syzygies of J. This function computes an elimination matrix corresponding to the residual resultant over V(I) over V(J).",
+
+
+	EXAMPLE {"R = QQ[X,Y,Z,x,y,z]",
+	"F = matrix{{x*y^2,y^3,x*z^2,y^3+z^3}}",
+	"G = matrix{{y^2,z^2}}",
+	"M = matrix{{1,0,0},{0,1,0},{0,0,1},{-X,-Y,-Z}}",
+	"H = (F//G)*M",
+	"l = {x,y,z}",
+	"L=cm2Res (G,H,l)",
+	"maxCol L",
+		},
+     
+	SeeAlso => {macaulayFormula, macRes,ciRes, bezoutianMatrix}
+     
+}
+
+
+------------------------ \ detRes / ------------------------
+document {
+     	Key => {detRes},
+	Headline => "returns a matrix corresponding to the residual resultant over a Cohen-Macaulay codimension 2 base locus",
+	Usage => " detRes(aSingleRowMatrix, Matrix, varList)",
+
+	Inputs => {
+		"Matrix" => Matrix => {"a polynomial matrix M"},
+		"Integer" => ZZ => {"an integer r corresponding to the regularity index used to form the determinantal resultant"},
+		"varList" => List => {" a list of homogeneous variables that are to be eliminated"},
+	},
+	Outputs => {
+		"aMatrix" => Matrix => {"a matrix corresponding to the determinantal resultant"}
+	},
+
+	PARA {}, " Compute the determinantal resultant of an (n,m)-matrix (n<m) of homogeneous polynomials over the projective space of dimension m-n, i.e. a condition on the parameters of these polynomials to have rank(M)<n. The integer r is used to form the matrix detRes",
+
+
+	EXAMPLE {"R=QQ[a_0..a_5,b_0..b_5,x,y]",
+	"M:=matrix{{a_0*x+a_1*y,a_2*x+a_3*y,a_4*x+a_5*y},{b_0*x+b_1*y,b_2*x+b_3*y,b_4*x+b_5*y}}",
+	"detRes(M,1,{x,y})"
+		},
+     
+	SeeAlso => {macaulayFormula, macRes,ciRes, cm2Res, bezoutianMatrix}
+     
+}
+
+
+------------------------ \ detResDeg / ------------------------
+document {
+     	Key => {detResDeg},
+	Headline => "compute a regularity index and partial degrees of the determinantal resultant",
+	Usage => " detResDeg(List, List, integer, Ring)",
+
+	Inputs => {
+		"List" => List => {"a list of degrees indexing the columns of a polynomial matrix "},
+		"List" => List => {"a list of degrees indexing the rows of the same polynomial matrix M"},
+		"Integer" => ZZ => {"an integer r corresponding to the drop of rank used to form the determinantal resultant"},
+		"Ring" => Ring => {" an ambient ring where the computations take place"},
+	},
+	Outputs => {
+		"aList" => List => {"a list of element consisting of a regularity index and partial degree of homogeneity of the  determinantal resultant"}
+	},
+
+	PARA {}, " Compute the regularity index and the multi-degree of the determinantal resultant associated to the matrix M",
+
+
+	EXAMPLE {"R = ZZ[d1,d2,d3,k1,k2]",
+	"detResDeg({d1,d2,d3},{k1,k2},1,R)",
+		},
+     
+	SeeAlso => {macaulayFormula, macRes,ciRes, ciResDeg, cm2Res, bezoutianMatrix}
+     
+}
+
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 
@@ -1448,40 +1592,10 @@ R=QQ[a_0,a_1,a_2,a_3,a_4,b_0,b_1,b_2,b_3,b_4,c_0,c_1,c_2,c_3,c_4,x,y,z];
 G=matrix{{z,x^2+y^2}}; 
 H=matrix{{a_0*z+a_1*x+a_2*y,b_0*z+b_1*x+b_2*y,c_0*z+c_1*x+c_2*y},{a_3,b_3,c_3}}; 
 L=ciRes(G,H,{x,y,z})
-MaxCol L_1
+maxCol L
 
 
-assert(toString L_1 == "matrix {{a_3, b_3, c_3, -a_3*b_1+a_1*b_3, 0, 0, -a_3*c_1+a_1*c_3, 0, 0, -b_3*c_1+b_1*c_3, 0, 0}, {0, 0, 0, -a_3*b_2+a_2*b_3, -a_3*b_1+a_1*b_3, 0, -a_3*c_2+a_2*c_3, -a_3*c_1+a_1*c_3, 0, -b_3*c_2+b_2*c_3, -b_3*c_1+b_1*c_3, 0}, {a_1, b_1, c_1, -a_3*b_0+a_0*b_3, 0, -a_3*b_1+a_1*b_3, -a_3*c_0+a_0*c_3, 0, -a_3*c_1+a_1*c_3, -b_3*c_0+b_0*c_3, 0, -b_3*c_1+b_1*c_3}, {a_3, b_3, c_3, 0, -a_3*b_2+a_2*b_3, 0, 0, -a_3*c_2+a_2*c_3, 0, 0, -b_3*c_2+b_2*c_3, 0}, {a_2, b_2, c_2, 0, -a_3*b_0+a_0*b_3, -a_3*b_2+a_2*b_3, 0, -a_3*c_0+a_0*c_3, -a_3*c_2+a_2*c_3, 0, -b_3*c_0+b_0*c_3, -b_3*c_2+b_2*c_3}, {a_0, b_0, c_0, 0, 0, -a_3*b_0+a_0*b_3, 0, 0, -a_3*c_0+a_0*c_3, 0, 0, -b_3*c_0+b_0*c_3}}")
-///
-
-
--- Test 7
--- Checking the function CiRes
-TEST ///
-
-R = QQ[u_0,u_1,u_2,x,y,z];
-G = matrix{{z,x^2+y^2}};
-F = matrix{{y*z+x^2+y^2,-z^2+2*x^2+2*y^2,(u_0*x+u_1*y+u_2*z)*z}};
-l = {x,y,z};
-CiR = (ciRes (G,F // G,l))
-
-assert(toString CiR_0 == "matrix {{x^2, x*y, x*z, y^2, y*z, z^2}}")
-
-listCiR = matrixToListByColumns CiR_1;
-
-assert(toString listCiR_0 == "{1, 0, 0, 1, 1, 0}")
-assert(toString listCiR_1 == "{2, 0, 0, 2, 0, -1}")
-assert(toString listCiR_2 == "{0, 0, u_0, 0, u_1, u_2}")
-assert(toString listCiR_3 == "{0, 2, 1, 0, 0, 0}")
-assert(toString listCiR_4 == "{0, 0, 0, 2, 1, 0}")
-assert(toString listCiR_5 == "{0, 0, 0, 0, 2, 1}")
-assert(toString listCiR_6 == "{-u_0, -u_1, -u_2, 0, 0, 0}")
-assert(toString listCiR_7 == "{0, -u_0, 0, -u_1, -u_2, 0}")
-assert(toString listCiR_8 == "{0, 0, -u_0, 0, -u_1, -u_2}")
-assert(toString listCiR_9 == "{-2*u_0, -2*u_1, -2*u_2, 0, 0, 0}")
-assert(toString listCiR_10 == "{0, -2*u_0, 0, -2*u_1, -2*u_2, 0}")
-assert(toString listCiR_11 == "{0, 0, -2*u_0, 0, -2*u_1, -2*u_2}")
-
+assert(toString L == "matrix {{a_3, b_3, c_3, -a_3*b_1+a_1*b_3, 0, 0, -a_3*c_1+a_1*c_3, 0, 0, -b_3*c_1+b_1*c_3, 0, 0}, {0, 0, 0, -a_3*b_2+a_2*b_3, -a_3*b_1+a_1*b_3, 0, -a_3*c_2+a_2*c_3, -a_3*c_1+a_1*c_3, 0, -b_3*c_2+b_2*c_3, -b_3*c_1+b_1*c_3, 0}, {a_1, b_1, c_1, -a_3*b_0+a_0*b_3, 0, -a_3*b_1+a_1*b_3, -a_3*c_0+a_0*c_3, 0, -a_3*c_1+a_1*c_3, -b_3*c_0+b_0*c_3, 0, -b_3*c_1+b_1*c_3}, {a_3, b_3, c_3, 0, -a_3*b_2+a_2*b_3, 0, 0, -a_3*c_2+a_2*c_3, 0, 0, -b_3*c_2+b_2*c_3, 0}, {a_2, b_2, c_2, 0, -a_3*b_0+a_0*b_3, -a_3*b_2+a_2*b_3, 0, -a_3*c_0+a_0*c_3, -a_3*c_2+a_2*c_3, 0, -b_3*c_0+b_0*c_3, -b_3*c_2+b_2*c_3}, {a_0, b_0, c_0, 0, 0, -a_3*b_0+a_0*b_3, 0, 0, -a_3*c_0+a_0*c_3, 0, 0, -b_3*c_0+b_0*c_3}}")
 ///
 
 
