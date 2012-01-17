@@ -1,0 +1,719 @@
+\documentclass[10pt]{amsart}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{latexsym} 
+\usepackage{amssymb,amsfonts,amscd,amssymb,amsmath}
+\usepackage{url} 
+\usepackage[dvips]{graphicx}
+ \usepackage{color}
+
+\textwidth=15.5truecm 
+\textheight=22truecm 
+\oddsidemargin=0.3truecm
+\evensidemargin=0.2truecm 
+\topmargin=-.8truecm
+
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{claim}[thm]{Claim}
+\newtheorem{axiom}[thm]{Axiom}
+\newtheorem{conj}[thm]{Conjecture}
+\newtheorem{fact}[thm]{Fact}
+\newtheorem{hypo}[thm]{Hypothesis}
+\newtheorem{assum}[thm]{Assumption}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{crit}[thm]{Criterion}
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{exmp}[thm]{Example}
+\newtheorem{rem}[thm]{Remark}
+\newtheorem{prob}[thm]{Problem}
+\newtheorem{prin}[thm]{Principle}
+\newtheorem{ques}[thm]{Question}
+\newtheorem{nota}[thm]{Notation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\QQ{{\mathbb{Q}}} 
+\def\ZZ{{\mathbb{Z}}}
+\def\PP{{\mathbb{P}}} 
+\def\KK{{\mathbb{K}}}
+\def\c{{\mathbf{c}}} 
+\def\f{{\mathbf{f}}}
+\def\k{{\mathbf{k}}}
+\def\x{\mathbf{x}} 
+\def\t{\mathbf{t}} 
+\def\z{\mathbf{z}} 
+\def\Zc{{\mathcal{Z}}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\rae{\mathfrak S}
+\def\fit{\mathfrak F}
+\def\d{{\mathbf{d}}}
+
+\def\F.{F_\bullet}
+
+\def\lto{\longrightarrow}
+
+\DeclareMathOperator\Res{Res}
+\DeclareMathOperator\Div{div}\def\div{\Div}
+\DeclareMathOperator\im{im}
+\DeclareMathOperator\rank{rank}
+\DeclareMathOperator\annn{ann}
+\DeclareMathOperator\codim{codim}
+\DeclareMathOperator\cd{cd}
+\DeclareMathOperator\coker{coker}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\title{Package for elimination theory in Macaulay2}
+
+\author{Nicol\'as Botbol, Laurent Bus\'e and  Manuel Dubinsky}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+\begin{abstract} 
+We present implementations in the computer systems \textit{Macaulay2} (cf.\ \cite{M2}) for computing determinant of free complexes and resultant matrices.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}\label{secIntro}
+The aim of this paper is to give an overview of the content of the \textit{Macaulay2} package ``Resultants.m2" for elimination theory, emphasizing universal formulas, in particular, resultant computations. 
+
+The package contains an implementation for computing determinant of free graded complexes, called \texttt{detComplex}, with several derived methods: \texttt{listDetComplex}, \texttt{mapsComplex} and \texttt{minorsComplex}. This provides a method for producing universal formulas for any family of schemes, just by combining the \texttt{resolution} M2 method with \texttt{detComplex}. In Section \ref{secDetComplex} determinants of free resolutions are treated, as well as a few examples. We recommend to see \cite{Dem84, Jou95, GKZ94, Buse1} for more details on determinants of complexes in elimination theory.
+
+The package also provides methods for computing matrices and formulas for different resultants applicable on different families of polynomials, such as the Macaulay resultant (\texttt{macRes}) for generic homogeneous polynomials; residual resultant (\texttt{ciRes}, \texttt{cm2Res}) for generic polynomials having a non empty base locus scheme;
+determinantal resultant  (\texttt{detRes}) for generic polynomial matrices of a given generic rank. Those resultants and their implementation are reviewed in Section \ref{secResultants}, and for the theory behind the reader can refer to \cite{Jou91, Cha1, GKZ94, Jou95, Jou97, CLO98, BEM01, BusPhD, Buse1, Bus04}.
+
+The goal of this package is to provide universal formulas for elimination. The main advantage of this approach consists in the fact that we can provide formulas for any family of polynomials just by taking determinant to a free resolution. A direct consequence of a universal formula is that it is preserved by base change, this is, in particular, it commutes with specialization. A deep study of universal formulas for the image of a map of schemes can be seen in \cite[Chapter V]{EH00}.
+
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Determinant of a complex}\label{secDetComplex}
+
+Here we recall what the determinant of a complex is and how it provides a constructive method to produce elimination formulas. Assume $A$ is an integer domain (which in general is a polynomial ring over $\ZZ$ or a field), let $\F.$ be a finite complex of length $n\geq 1$ of free $A$-modules, 
+\[
+\F. : 0\lto F_n\stackrel{\varphi_n}{\lto} F_{n-1}\stackrel{\varphi_{n-1}}{\lto}\cdots \lto F_1\stackrel{\varphi_1}{\lto} F_0\lto 0,
+\]
+such that $\chi(\F.)=\sum_i (-1)^ir_i=0$, where $F_i\cong A^{r_i}$.
+
+\bigskip
+Since $\chi(\F.)=0$, the free complex can be split in the following way:
+
+For all $i=0,\hdots,n$, $F_i$ splits as $F_i=F^{(0)}_i\oplus F^{(1)}_i$, with $F^{(0)}_i$ and $F^{(1)}_i$ both free $A$-modules of rank $\sum_{j=0}^{n-i-1}(-1)^jr_{i+1+j}$ and $\sum_{j=0}^{n-i}(-1)^jr_{i+j}$ respectively, in such a way that the map $\varphi_i:F^{(0)}_i\oplus F^{(1)}_i\to F^{(0)}_{i-1}\oplus F^{(1)}_{i-1}$ can be written as 
+\[
+\varphi_i=\left( \begin{array}{cc} a_i& c_i \\b_i &d_i \end{array}\right),
+\]
+with $\det(c_i)\neq 0$.
+
+\begin{defn}
+The determinant of the complex $\F.$ is defined as
+\[
+ \det(\F.):=\prod_{i=0}^n\det(c_i)^{(-1)^{i-1}}.
+\]
+\end{defn}
+
+\begin{thm}\label{thmDetComp}
+ Let $\F.$ be a complex of finitely generated free $A$-modules, admitting a decomposition as before, where $c_i: F_i^{(1)}\to F_{i-1}^{(0)}$ is injective. Then, $H_i(\F.)$ is $A$-torsion for all $i$, and 
+\[
+ \sum_i (-1)^i \div(H_i(\F.)) = [\det(\F.)].
+\]
+\end{thm}
+For the proof of Theorem \ref{thmDetComp} refer to \cite{Cha1} or to \cite{Dem84}.
+
+\begin{cor} 
+If $\F.$ is a free complex of an $A$-torsion module such that $\codim_A(H_i(\F.))> 1$ for $i\geq 1$), then
+\[
+\div(H_0(\F.))=\div(\coker(\varphi_1)))=[\det(\F.)].
+\]
+\end{cor}
+
+\medskip
+
+With this tool, (universal) elimination formulas are obtained as follows: starting from a polynomial system and some knowledge of its geometry  (for instance the existence or the absence of a base locus), one determines a complex which is generically (in terms of the parameters of the system, that is to say in terms of the indeterminates of the system that will not be eliminated) acyclic. Next, one takes a graded part of this complex with respect to the variables to be eliminated and beyond a certain threshold (usually expressed as a certain regularity index); the determinant of this complex then produces an elimination formula. In the following section, we provide particular examples of this approach that are well-known: resultant matrices.  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Resultants}\label{secResultants}
+
+\subsection{The Macaulay resultant}
+Introduced by F.S.\ Macaulay in {\cite{Mac02}},
+corresponds to the direct generalization of the well-known Sylvester
+resultant of two bivariate homogeneous polynomials. For all
+$i=0,\ldots,n$ suppose given a homogeneous polynomial of degree
+$d_i\geq 1$ in the variables $\x=(x_0,\ldots,x_n)$,
+$$f_i(\x)=\sum_{|\alpha|=d_i}\c_{i,\alpha} \x^\alpha,$$
+where $\alpha$
+is a n-uple of non negative integers $(\alpha_0,\ldots,\alpha_n)$,
+$\x^\alpha$ denotes the monomial $x_0^{\alpha_0}\ldots x_n^{\alpha_n}$
+and $\c_{i,\alpha}$ denotes the coefficients which are in a field
+$\KK$. Considering all the coefficients $\c_{i,\alpha}$ as
+indeterminates, there exists an irreducible homogeneous polynomial in
+the ring $A:=\KK[\c_{i,\alpha} : |\alpha|=d_i, i=0,\ldots,n]$ which is
+homogeneous for all $i=0,\ldots,n$ in the set of variables
+$\{\c_{i,\alpha}, |\alpha|=d_i\}$ of degree $\frac{d_0d_1\ldots
+  d_n}{d_i}$. This polynomial is the so-called Macaulay resultant and
+we denote it by $\Res(f_0,\hdots,f_n)$ and satisfies that
+\begin{enumerate}
+\item if $A'$ is a ring, $\phi:A\to A'$ is a map ring and also by $\phi$ the induced map $A[\x]\to A'[\x]$, then 
+\[
+ \phi \Res(f_0,\hdots,f_n) = \Res(\phi f_0,\hdots, \phi f_n);
+\]
+\item for any given
+polynomials $f_0,\ldots,f_n$ with coefficients $\c_{i,\alpha}$ in
+$\KK$, 
+\[
+ \Res(f_0,\ldots,f_n)=0 \Leftrightarrow \exists x\in \PP^n : f_0(x)=\cdots=f_n(x)=0.
+\]
+\end{enumerate} 
+
+\begin{exmp}\label{exmpMacRes}
+Consider the polynomials \texttt{f1 = a*x\^{}2+b*x*y+c*y\^{}2} and \texttt{f2 = 2*a*x+b*y} in the ring \texttt{R=QQ[a,b,c,x,y]}. 
+Denoting \texttt{M = matrix\{\{f1,f2\}\}}, the Macaulay resultant $\Res_{x,y}(f_1,f_2)$ can be computed as 
+\begin{verbatim}
+>det(macRes(M,{x,y})_1)
+\end{verbatim}
+One can verify that the matrix \texttt{macRes(M,\{x,y\})\_1}
+coincides with the Sylvester matrix 
+\begin{verbatim}
+>Syl=matrix{{a, 2*a, 0},{b, b, 2*a},{c, 0, b}}
+\end{verbatim}
+
+\medskip
+
+Now, since  \texttt{f1} and \texttt{f2} form a regular sequence in \texttt{R=QQ[a,b,c,x,y]}, and \texttt{M = matrix\{\{f1,f2\}\}}, the Koszul complex \texttt{koszul M} is a free resolution of $R/(f_1,f_2)$.
+
+Thus, we get that \texttt{(macRes(M,\{x,y\})\_1)} coincides with the right-most map of the Koszul complex \texttt{koszul M} in degree $2$ on the variables \texttt{\{x,y\}}. The list of maps of \texttt{koszul M} in degree $2$ on the variables \texttt{\{x,y\}} can be computed as
+\begin{verbatim}
+>mapsComplex(koszul M,{x,y},2)	
+\end{verbatim}
+and right-most means $0$-th position in the list, that is to say :
+\begin{verbatim}
+>mapsComplex(koszul M,{x,y},2)_0	
+\end{verbatim}
+\end{exmp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Residual resultants}
+The residual resultant is an extension of the classical
+resultant theory \cite{BEM00,BEM01,Bus01,BusPhD}. Consider a polynomial system
+depending on parameters. In many situations coming from practical
+problems, polynomial systems 
+depending on parameters have common zeros which do not depend on these 
+parameters, and which we are not interested in. We are going to
+present here how to compute a resultant in such a situation, which is called
+a residual resultant, under suitable assumptions. 
+ 
+Let $g_{1},\ldots,g_{m}$ be $m$ homogeneous polynomials of degree $k_1
+\geq \ldots \geq k_m\geq 1$ in $S=\KK[x_0,\ldots,x_n]$. Being given
+$n+1$ integers $d_{0} \geq \ldots \geq d_{n}\geq k_1$ such that
+$d_m\geq k_m+1$, there exists a resultant (called a residual resultant) associated to systems of the form:
+\begin{equation}\label{FGH}
+\f_{\c}:=
+\left\{
+\begin{array}{rcl}
+f_{0}(\x) & = &  \sum_{i=1}^{m}\, h_{i,0}(\x)\, g_{i}(\x) \\
+\vdots   \\
+f_{n}(\x) & = &  \sum_{i=1}^{m}\, h_{i,n}(\x)\, g_{i}(\x) \\
+\end{array} 
+\right.
+\end{equation}
+where $h_{i,j}(\x)=\sum_{|\alpha|=d_{j}-k_{i}} \, c^{i,j}_{\alpha}\,
+\x^{\alpha}$ is a homogeneous polynomial of degree $d_{j}-k_{i}$. It is an irreducible homogeneous polynomial in the ring of coefficients $\KK[c^{i,j}_{\alpha}]$. Being given some specialized polynomials $f_0,\ldots,f_n$, we have the property
+$$
+ \exists\,  x\notin V(g_1,\ldots,g_m) : f_0(x)=\cdots=f_n(x)=0 \Rightarrow \Res(f_0,\ldots,f_n)=0.
+$$
+Notice that the polynomials $g_1,\ldots,g_m$ describe exactly the variety of base points we are not interested in. Notice also that this last property can be stated as an equivalence on what are called blow-up varieties, but we are not going to describe them here, we refer to \cite{BEM01,BusPhD} for more details. 
+
+We now show how it is possible to compute these residual resultants.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{General residual resultants}
+
+Whatever the base points are, that is to say whatever the polynomials
+$g_1,\ldots,g_m$ are, it is always possible to compute a non zero multiple of
+the residual resultant using Bezoutian matrices (see
+\cite{BEM00,BusPhD}).
+
+
+The Bezoutian $\Theta_{f_0,\ldots,f_n}$ of $f_{0},\ldots, f_{n} \in S$
+is the element of $S \otimes_{\KK} S$ defined by
+\begin{eqnarray*}
+\Theta_{f_0,\ldots,f_n}(\t,\z) {:\,\!=}  
+{\left|
+\begin{array}{cccc}
+f_0(\t) & \theta_1(f_0)(\t,\z) & \cdots & \theta_n(f_0)(\t,\z) \\
+\vdots & \vdots          &  &  \vdots         \\
+f_n(\t) & \theta_1(f_n)(\t,\z) & \cdots & \theta_n(f_n)(\t,\z) 
+\end{array}       \right|} ,
+\end{eqnarray*} 
+where
+$$
+\theta_i(f_j)(\t,\z):=\frac{f_j(z_1,\ldots,z_{i-1},t_{i},\ldots,t_n)-
+  f_j(z_1,\ldots,z_{i},t_{i+1},\ldots,t_n)}{t_i-z_i} .
+$$
+Let $ \Theta_{f_{0},\ldots,f_n}(\t,\z)= \sum \theta_{\a\b}\,
+\t^{\a}\z^{\b}, \theta_{\a,\b} \in \KK$. The Bezoutian matrix of
+$f_{0},\ldots,f_{n}$ is defined as the matrix $B_{f_{0},\ldots,f_{n}} =
+(\theta_{\a\b})_{\a , \b}$. And we have:
+
+\begin{thm}
+  Any maximal minor of the Bezoutian matrix
+  $B_{{f}_{0},\ldots,{f}_{n}}$ is divisible by the resultant
+  $\Res(f_0,\ldots,f_n)$.
+\end{thm}
+
+Notice that we do not need to know the polynomials $g_1,\ldots,g_m$ to perform the computation of the Bezoutian matrix. In fact the only thing we have to check is that the polynomials $f_0,\ldots,f_m$ separate points and tangent vectors on an open subset of $\PP^n$ (see \cite{BEM00} for more details on this point).
+
+\paragraph{Example.} Consider the three following polynomials (\cite{BEM00}, example 1.5):
+$$ \left\{
+\begin{array}{l}
+f_{0} = c_{{0,0}}+c_{{0,1}}t_{1}+c_{{0,2}}t_2+c_{{0,3}}({t_{1}}^{2}+{t_2}^{2})\\
+f_{1} = c_{{1,0}}+c_{{1,1}}t_{1}+c_{{1,2}}t_2+c_{{1,3}}({t_{1}}^{2}+{t_2}^{2})
++c_{1,4}({t_{1}}^{2} +{t_2}^{2})^{2} \\
+f_{2} =  c_{{2,0}}+c_{{2,1}}t_{1}+c_{{2,2}}t_2+c_{{2,3}}({t_{1}}^{2}+{t_2}^{2})
++c_{2,4}({t_{1}}^{2} +{t_2}^{2})^{2}. \\
+\end{array} \right.
+$$ 
+Using the method {\tt bezoutianMatrix} we can compute the Bezoutian matrix, which is of size $12\times 12$ and of rank 10. The determinant of a maximal minor yields a huge polynomial  in $(c_{i,j})$ containing $2
+07805$ monomials. It can be factorized as $q_1q_2(q_{3})^{2}\rho$, with 
+$$
+\begin{array}{lll}
+q_1 & = & -c_{{0,2}}c_{{1,3}}c_{{2,4}}+c_{{0,2}}c_{{1,4}}c_{{2,3}}+c_{{1,2}}c_{{
+0,3}}c_{{2,4}}-c_{{2,2}}c_{{0,3}}c_{{1,4}}  \\
+
+q_2 & = & c_{{0,1}}c_{{1,3}}c_{{2,4}}-c_{{0,1}}c_{{1,4}}c_{{2,3}}-c_{{1,1}}c_{{0
+,3}}c_{{2,4}}+c_{{2,1}}c_{{0,3}}c_{{1,4}}  \\
+
+q_3 & = & {c_{{0,3}}}^{2}{c_{{1,1}}}^{2}{c_{{2,4}}}^{2} -2{c_{{0,3}}}^{2}c_{{1,1
+}}c_{{2,1}}c_{{2,4}}c_{{1,4}} + {c_{{0,3}}}^{2}{c_{{2,4}}}^{2}{c_{{1,2}}}^{2} + 
+\cdots \\
+
+\rho & = &  {c_{{2,0}}}^{4}{c_{{1,4}}}^{4}{c_{{0,2}}}^{4} + {c_{{2,0}}}^{4}{c_{{1,4
+}}}^{4}{c_{{0,1}}}^{4} + {c_{{1,0}}}^{4}{c_{{2,4}}}^{4}{c_{{0,2}}}^{4} + {c_{{1,
+0}}}^{4}{c_{{2,4}}}^{4}{c_{{0,1}}}^{4} + \cdots \\
+\end{array}
+$$
+The polynomials $q_{3}$ and $\rho$ contain respectively $20$ and $2495$
+monomials. As for generic equations $f_{0}, f_{1}, f_{2}$,
+the number of points in the varieties $\Zc(f_{0},f_{1})$,
+$\Zc(f_{0},f_{2})$, $\Zc(f_{1},f_{2})$ is $4$ (see for instance
+\cite{MB94mega}), 
+ $\Res(f_{0},f_{1},f_{2})$ is homogeneous of degree
+$4$ in the coefficients of each $f_{i}$.
+Thus, it  corresponds to the last
+factor $\rho$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Residual resultants of a complete intersection}
+
+We suppose here that the ideal $G=(g_1,\ldots,g_m)$ is a
+\emph{complete intersection}, that is defines a variety of codimension
+$m$ in $\PP^n$. In this particular case we know how to compute exactly the residual resultant and also its degree. Indeed, its degree in the coefficients $(c_{\alpha}^{i,j})$ of each
+$f_j$ is given by
+$$N_j = \frac{P_{m_{j}}}{P_1}(k_{1},\ldots, k_{m})$$
+where, $m_{j}(T)
+= \sigma_{n}(\d) + \sum_{l=m}^{n}\sigma_{n-l}(\d)\, T^{l}$, with the
+notations $\d=(d_0,\ldots,d_{j-1},d_{j+1},\ldots,d_n), \ 
+\sigma_0(\d)=(-1)^{n}, \ \sigma_1(\d)=(-1)^{n-1}\sum_{l\neq j}d_l, \ 
+\sigma_2(\d)=(-1)^{n-2}\sum_{j_{1}\neq j, j_{2}\neq j,
+  j_{1}<j_{2}}d_{j_{1}}d_{j_{2}}, \ \dots, \ 
+\sigma_{n}(\d)=\prod_{l\neq j} d_l,$ and
+$$P_{m_j}(y_{1},\ldots,y_{m}) =\det\left(
+\begin{array}{ccc}
+m_j(y_{1}) & \cdots & m_j(y_{m}) \\
+y_{1}    & \cdots & y_{m} \\
+\vdots   &        & \vdots \\
+y_{1}^{m-1}    & \cdots & y_{m}^{m-1} \\
+\end{array}
+\right).$$
+
+
+\begin{exmp}
+ As an example we suppose that $n=3$ and $m=2$. Then we can obtain the critical degree and the multi-degree of the residual resultant with  \textit{Macaulay2}:
+\begin{verbatim}
+>R=ZZ[d_0..d_4,k_1,k_2]:
+>CiResDeg({d_0,d_1,d_2,d_3},{k_1,k_2})
+\end{verbatim}   
+With {\tt Maple} we can obtain partial multi-degree: for instance the degree of the residual resultant in the coefficient of the polynomial $f_0$ is given by
+\begin{verbatim}
+>bkmdegree([d1,d2,d3],[k1,k2]);
+\end{verbatim}   
+which returns $(-d_3 - d_2 - d_1 + k_2 + k_1) k_1 k_2 + d_1 d_2 d_3$.
+\end{exmp}
+
+We denote by $H$ the matrix $(h_{i,j})_{1\leq i\leq m,0 \le j \le n}$
+and by $\Delta_{i_{1}\ldots i_{m}}$ the $m\times m$ minors of $H$
+corresponding to the columns $i_{1},\ldots, i_{m}$.  We also define the homogeneous ideal $F=(f_0,\ldots,f_n) \subset S$.
+
+\begin{thm} For any $\nu \geq \sum_{i=0}^{n}d_i-n-(n-m+2)k_m$, the
+  morphism
+  $$
+  \partial_\nu : \biggl( \bigoplus_{0 \leq i_{1} < \ldots < i_{m}
+    \leq n } S_{\nu-d_{i_1}-\dots-d_{i_m}+\sum_{i=1}^m
+    k_i}e_{i_1}\wedge \cdots \wedge e_{i_m} \biggr)\bigoplus \biggl(
+  \bigoplus_{i=0}^{i=n} S_{\nu -d_{i}}e_{i}^{'}\biggr) \longrightarrow
+  S_{\nu} $$
+  $$
+  e_{i_1}\wedge \cdots \wedge e_{i_m} \longrightarrow
+  \Delta_{i_1\ldots i_m} $$
+  $$e_{i}^{'} \longrightarrow f_i $$
+  is surjective if and only if
+  $V(F:G)=\emptyset$ (or $F^{sat}=G^{sat}$).  In this case, all
+  nonzero maximal minors of size $\dim_\KK(S_\nu)$ of the matrix
+  $\partial_\nu $ is a multiple of the residual resultant, and the
+  gcd of all these maximal minors is exactly the residual resultant.
+\end{thm}
+
+\begin{exmp}\label{exmpCiRes}
+ We consider the following example
+$$\left\{
+\begin{array}{l}
+f_{0} =
+a_0z+a_1x+a_2y+a_3(x^2+y^2)\\
+f_{1} =
+b_0z+b_1x+b_2y+b_3(x^2+y^2)\\
+f_{2} =
+c_0z+c_1x+c_2y+c_3(x^2+y^2),\\
+\end{array}
+\right.$$
+of three circles in the plane. We would like to know when they intersect outside the two trivial points given by $V(z,x^2+y^2)$. We use \textit{Macaulay2} to compute the associated residual resultant matrix:
+
+\begin{verbatim}
+>R=QQ[a_0,a_1,a_2,a_3,a_4,b_0,b_1,b_2,b_3,b_4,c_0,c_1,c_2,c_3,c_4,x,y,z]; 
+>G=matrix{{z,x^2+y^2}}; 
+>H=matrix{{a_0*z+a_1*x+a_2*y,b_0*z+b_1*x+b_2*y,c_0*z+c_1*x+c_2*y}, 
+          {a_3,b_3,c_3}}; 
+>F=G*H;  
+>L=CiRes(G,H,{x,y,z});
+>MaxCol L_1
+\end{verbatim}
+which returns:
+$$\begin{pmatrix}{{a}}_{{3}}&
+      {{b}}_{{3}}&
+      {{c}}_{{3}}&
+      -{{a}}_{{3}} {{b}}_{1}+{{a}}_{1} {{b}}_{{3}}&
+      0&
+      -{{a}}_{{3}} {{c}}_{1}+{{a}}_{1} {{c}}_{{3}}\\
+      0&
+      0&
+      0&
+      -{{a}}_{{3}} {{b}}_{{2}}+{{a}}_{{2}} {{b}}_{{3}}&
+      -{{a}}_{{3}} {{b}}_{1}+{{a}}_{1} {{b}}_{{3}}&
+      -{{a}}_{{3}} {{c}}_{{2}}+{{a}}_{{2}} {{c}}_{{3}}\\
+      {{a}}_{1}&
+      {{b}}_{1}&
+      {{c}}_{1}&
+      -{{a}}_{{3}} {{b}}_{0}+{{a}}_{0} {{b}}_{{3}}&
+      0&
+      -{{a}}_{{3}} {{c}}_{0}+{{a}}_{0} {{c}}_{{3}}\\
+      {{a}}_{{3}}&
+      {{b}}_{{3}}&
+      {{c}}_{{3}}&
+      0&
+      -{{a}}_{{3}} {{b}}_{{2}}+{{a}}_{{2}} {{b}}_{{3}}&
+      0\\
+      {{a}}_{{2}}&
+      {{b}}_{{2}}&
+      {{c}}_{{2}}&
+      0&
+      -{{a}}_{{3}} {{b}}_{0}+{{a}}_{0} {{b}}_{{3}}&
+      0\\
+      {{a}}_{0}&
+      {{b}}_{0}&
+      {{c}}_{0}&
+      0&
+      0&
+      0\\
+      \end{pmatrix}$$
+whose determinant is the desired condition multiplied by $a_3(-a_2b_3+a_3b_2)$.
+\end{exmp}
+
+Next example show how the right-most map of a free resolution does not coincide with the matrix we compute by applying directly the \texttt{CiRes} method, but they does coincide by reordering their columns and changing their signs.
+
+\begin{exmp}
+(Follows from Example \ref{exmpCiRes}) Take \texttt{F := G*H}. The matrix \texttt{L := CiRes(G,H,\{x,y,z\})} can not be computed as the right most map of any free resolution of \texttt{I := ideal F:ideal G} in degree \texttt{nu := ciResDegGH (G,H,\{x,y,z\})}, but, in this case, both matrices coincides by alternating their columns and changing their signs. This is, the matrix \texttt{(mapsComplex (res I, \{x,y,z\}, nu))\_0} has exactly the same columns as \texttt{L}, hence, the Complete Intersection Residual Resultant can be computed by means of any of these two matrices by taking gcd of maximal minors, or as the determinant of the complex \texttt{res I} with respect to the variables \texttt{\{x,y,z\}} in degree \texttt{2}.
+\end{exmp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Residual resultants of a local complete intersection ACM of codimension 2}\label{cm2res}
+
+We have just seen that if the ideal $G=(g_1,\ldots,g_m)$ is a complete intersection we know how
+to compute the corresponding residual resultant. There is another case
+where we have similar results, the case where $G$ is a \emph{local}
+complete intersection of codimension 2 arithmetically Cohen-Macaulay
+(abbreviated ACM) ideal \cite{BusPhD}. For simplicity we restrict
+ourselves to the case of three homogeneous variables \cite{Bus01},
+i.e. $n=2$, since in this case $G$ has only to be an ideal of $\PP^2$
+defining isolated points. We refer to \cite{BusPhD} chapter 3 for the
+general situation.
+
+First we compute the syzygies of $G$, i.e. the matrix $\psi$ which is such that:
+\begin{equation}\label{resG}
+0 \rightarrow \bigoplus_{i=1}^{m-1}S[-l_i]  \xrightarrow{\psi} 
+\bigoplus_{i=1}^{m}S[-k_i] \xrightarrow{\gamma=(g_1,\ldots,g_m)} G
+\rightarrow 0,
+\end{equation}
+with $\sum_{i=1}^{m-1}l_i=\sum_{i=1}^{m}k_i$.
+At this point we can compute the degree of the residual resultant: it is homogeneous in the
+coefficient of each $f_i$, $i=0,1,2$, of degree
+$$\frac{d_0d_1d_2}{d_i}-\frac{\sum_{j=1}^{m-1}l_j^2-\sum_{j=1}^{m}k_j^2}{2}.$$
+Now we construct the $m\times (m+2)$ glued matrix
+$$\bigoplus_{i=1}^{m-1}S[-l_i]\bigoplus_{i=0}^{2}S[-d_i]
+\xrightarrow{\psi \oplus \phi} \bigoplus_{i=1}^{m}S[-k_i],$$
+where
+$\phi$ is the matrix $(h_{i,j})_{1\leq i \leq m, 0\leq j \leq 2}$. And we have:
+
+\begin{thm} We denote by $\Delta_{i_1,\ldots,i_m}$ the determinant 
+  of the submatrix of the map $\phi\oplus\psi$ corresponding to
+  columns $i_1,\ldots,i_m$, and by $\alpha_{i_1,\ldots,i_m}$ its
+  degree. Then, for any $\nu \geq \sum_{i=0}^{n}d_i-n(k_m+1)$, the
+  morphism
+\begin{eqnarray*}
+ \partial_\nu \, : \,  \bigoplus_{0 \leq i_{1} < \ldots < i_{m} \leq n }
+S_{\nu-\alpha_{i_1,\ldots,i_m}}e_{i_1}\wedge \cdots
+\wedge e_{i_m}  &  \longrightarrow  & S_{\nu} \\
+e_{i_1}\wedge \cdots \wedge e_{i_m}  & \mapsto & 
+\Delta_{i_1\ldots i_m}
+\end{eqnarray*}
+is surjective if and only if $V(F:G)=\emptyset$ (or
+$F^{sat}=G^{sat}$).  In this case, all non-zero maximal minors of size
+$\dim_\KK(S_\nu)$ of the matrix $\partial_\nu $ is a multiple of
+the residual resultant, and the gcd of all these maximal minors is
+exactly the residual resultant.
+\end{thm}
+
+\begin{exmp}
+ As a simple example we consider the residual resultant of three cubics in $\PP^2$ passing through the same three points. Here is the \textit{Macaulay2} code:
+\begin{verbatim}
+>R=ZZ/32003[a_0..a_8,b_0..b_8,c_0..c_8,x_0,x_1,x_2]; 
+>G=matrix{{x_0*x_1,x_0*x_2,x_1*x_2}}; 
+>l0=for i from 0 to 2 list a_(0+3*i)*x_0+a_(1+3*i)*x_1+a_(2+3*i)*x_2;  
+>l1=for i from 0 to 2 list b_(0+3*i)*x_0+b_(1+3*i)*x_1+b_(2+3*i)*x_2; 
+>l2=for i from 0 to 2 list c_(0+3*i)*x_0+c_(1+3*i)*x_1+c_(2+3*i)*x_2; 
+>H=matrix{l0,l1,l2}; 
+>Cm2Res(G,H,{x_0,x_1,x_2})
+\end{verbatim}
+We obtain a $10\times 10$ matrix which is too big to be printed here.
+\end{exmp}
+
+\begin{exmp}
+ What is the condition so that four cubics in $\PP^3$ containing the twisted cubic have a common point outside this twisted cubic? We consider the following polynomials, $i=0,1,2,3$, 
+$$f_i=h_{1,i}(x)(x_1^2-x_0x_2)+h_{2,i}(x)(x_1x_2-x_0x_3)+h_{3,i}(x)(x_2^2-x_1x_3),$$
+where
+$h_{i,j}(x)=c_{i,j}^0x_0+c_{i,j}^1x_1+c_{i,j}^2x_2+c_{i,j}^3x_3$
+are linear forms. We just have to compute the residual resultant of this system, taking for the ideal $G$ the ideal of the twisted cubic, that is to say $G=(-{{x}}_{1}^{2}+{{x}}_{0} {{x}}_{{2}},
+-{{x}}_{1} {{x}}_{{2}}+{{x}}_{0} {{x}}_{{3}},
+-{{x}}_{{2}}^{2}+{{x}}_{1} {{x}}_{{3}})$. Its syzygies are given by the matrices  
+$$\psi=\left(\begin{array}{cc}
+        -x_2 & x_3 \\
+        x_1 & -x_2 \\
+        -x_0 & x_1 \\
+        \end{array}\right),\ \ \gamma=({{x}}_{1}^{2}-{{x}}_{0}
+      {{x}}_{{2}},
+      {{x}}_{1} {{x}}_{{2}}-{{x}}_{0} {{x}}_{{3}},
+{{x}}_{{2}}^{2}-{{x}}_{1} {{x}}_{{3}}).$$
+Now we can use {\tt cm2Res} to compute the residual resultant matrix.
+\end{exmp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Determinantal resultants}
+Determinantal resultants have been introduced in \cite{BusPhD} and further studied in \cite{Bus04} and \cite{BuGa05}. They correspond to a generalization of the classical resultants. We here restrict ourselves to the case of homogeneous polynomials and refer to the cited papers for more general situations.
+
+Let $m,n$ and $r$ be three integers such that $m\geq n > r \geq 0$. Given two sequences of integers $\{d_1,\ldots,d_m\}$ and $\{k_1,\ldots,k_n\}$ (not necessary positives) satisfying $d_i > k_j$ for all  $i,j$, we consider matrices of size $n\times m$ of homogeneous polynomials in variables $\x=(x_1,\ldots,x_{(m-r)(n-r)})$ 
+
+$$H=\left( \begin{array}{cccc}
+    h_{1,1}(\x) & h_{1,2}(\x) & \cdots & h_{1,m}(\x) \\
+    h_{2,1}(\x) & h_{2,2}(\x) & \cdots & h_{2,m}(\x) \\
+    \vdots & \vdots & & \vdots \\
+    h_{n,1}(\x) & h_{n,2}(\x) & \cdots & h_{n,m}(\x) \\
+  \end{array} \right),$$
+where $h_{i,j}(\x)=\sum_{|\alpha|=d_j-k_i}c_{\alpha}^{i,j}\x^\alpha$ is of degree $d_j-k_i$ and have coefficients $c_{\alpha}^{i,j}$ with value in a field $\KK$. The determinantal resultant of $H$, denotes hereafter $\Res(H)$ is a polynomial in the coefficients $c_{\alpha}^{i,j}$'s such that for any specialization of all these coefficients in $\KK$ we have
+$$\Res(H)=0 \Leftrightarrow \exists \, x \in \PP^{(m-r)(n-r)} : \rank(H(x))\leq r.$$
+In other words determinantal resultants give a necessary and sufficient condition so that a polynomial matrix depending on parameters is not of generic rank (with respect to its coefficients). We know how to compute them, as well as their multi-degree. They are multi-homogeneous in the coefficients of each column $i$ (that is in the
+coefficients of the polynomials $h_{1,i},h_{2,i},\ldots,h_{n,i}$), $i=1,\ldots,m$; their partial degree 
+is the
+coefficient of $\alpha_i$ of the multivariate polynomial (in variables
+$\alpha_1,\ldots,\alpha_m$)
+\begin{equation*}\label{degr}
+(-1)^{(m-r)(n-r)}\Delta_{m-r,n-r}\left(\frac{\prod_{i=1}^{m}(1-(d_i+\alpha_i)t)}{\prod_{i=1}^{n}(1-k_it)}\right),
+\end{equation*}
+where for all formal series $s(t)=\sum_{k=-\infty}^{+\infty}c_k(s)t^k,$ 
+we set 
+$$\Delta_{p,q}(s)=\det\left(
+         \begin{array}{ccc}
+          c_p(s) & \cdots & c_{p+q-1}(s) \\
+          \vdots & & \vdots \\
+          c_{p-q+1}(s) & \cdots & c_p(s)
+         \end{array}
+  \right).$$
+
+\begin{exmp} Using \textit{Macaulay2} you can compute the multi-degree of the determinantal resultant corresponding to $m=3$, $n=2$, $r=1$:
+\begin{verbatim}
+>DetResDeg({d1,d2,d3},{k1,k2},1,ZZ[d1,d2,d3,k1,k2])
+\end{verbatim}
+returns $\{{\text{d1}}+{\text{d2}}+{\text{d3}}-\text{k1}-2 \text{k2}-1,\{{\text{d2}}+{\text{d3}}-\text{k1}-\text{k2},{\text{d1}}+{\text{d3}}-\text{k1}-\text{k2},{\text{d1}}+{\text{d2}}-\text{k1}-\text{k2}\}\}$ giving the critical degree (see below) and the multi-degree of the determinantal resultant. 
+\end{exmp}
+
+
+We now describe how to compute explicitly determinantal resultants.  
+Consider the map 
+$$\begin{array}{ccl}
+  \bigoplus_{i_1<\ldots < i_{r+1},\, j_1<\ldots <j_{r+1}}
+  R_{[d-\sum_{t=1}^{r+1}d_{i_t}+\sum_{t=1}^{r+1}k_{i_t}]}e_{i_1,\ldots ,i_{r+1},j_1,\ldots ,j_{r+1}} &
+  \xrightarrow{\sigma_{d}} & R_{[d]} 
+\end{array}$$
+which associates to each $e_{i_1,\ldots, i_{r+1},j_1,\ldots ,j_{r+1}}$
+the polynomial $\Delta_{i_1,\ldots ,i_{r+1},\, j_1,\ldots ,j_{r+1}}$ 
+ denoting the determinant of the minor 
+$$\left( \begin{array}{cccc}
+    h_{j_1,i_1}(\x) & h_{j_1,i_2}(\x) & \cdots & h_{j_1,i_{r+1}}(\x) \\
+    h_{j_2,i_1}(\x) & h_{j_2,i_2}(\x) & \cdots & h_{j_2,i_{r+1}}(\x) \\
+    \vdots & \vdots & & \vdots \\
+    h_{j_{r+1},i_1}(\x) & h_{j_{r+1},i_2}(\x) & \cdots & h_{j_{r+1},i_{r+1}}(\x)\\
+  \end{array} \right),$$
+$R$ denoting the polynomial ring $\KK[x_1,\ldots,x_{(m-r)(n-r)}]$ and 
+$R_{[t]}$ being the vector space of homogeneous polynomials of fixed
+degree $t$. We define the critical degree to be the integer
+
+$$\nu_{\d,\k}=(n-r)(\sum_{i=1}^m d_i - \sum_{i=1}^n k_i) -
+ (m-n)(k_{r+1}+\cdots+k_n) - (m-r)(n-r)+1.$$
+
+\begin{prop} Choose an integer $d\geq \nu_{\d,\k}$. All nonzero maximal
+  minor (of size $\sharp R_{[d]}$) of the map $\sigma_{d}$ is a  
+ multiple of the determinantal resultant $\Res(H)$. 
+  Moreover the greatest common divisor of all the determinants of
+  these maximal minors is exactly $\Res(H)$.
+\end{prop}
+
+This proposition gives us an algorithm to compute explicitly 
+the determinantal resultant, completely similar  
+to the one giving the expression of the Macaulay resultant. Notice
+that it is also possible to give the equivalent (in a less 
+explicit form) of the 
+so-called Macaulay matrices (of the Macaulay resultant) for the
+principal (i.e. $r=n-1$) determinantal resultant \cite{BusPhD,Bus04}. 
+
+In \cite{Bus04} \S5.3 determinantal resultant with $m=n+1$ and $r=n-1$ are used to compute Chow forms of rational normal scrolls. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\cprime{$'$}
+\providecommand{\bysame}{\leavevmode\hbox to3em{\hrulefill}\thinspace}
+\providecommand{\MR}{\relax\ifhmode\unskip\space\fi MR }
+% \MRhref is called by the amsart/book/proc definition of \MR.
+\providecommand{\MRhref}[2]{%
+  \href{http://www.ams.org/mathscinet-getitem?mr=#1}{#2}
+}
+\providecommand{\href}[2]{#2}
+\begin{thebibliography}{BEM01}
+
+\bibitem[BEM00]{BEM00}
+Laurent Bus{\'e}, Mohamed Elkadi, and Bernard Mourrain, \emph{Generalized
+  resultants over unirational algebraic varieties}, J. Symbolic Comput.
+  \textbf{29} (2000), no.~4-5, 515--526.
+  
+\bibitem[BEM01]{BEM01}
+Laurent Bus{\'e}, Mohamed Elkadi, and Bernard Mourrain, \emph{{Resultant over the residual of a complete intersection}},
+  Journal of Pure and Applied Algebra \textbf{164} (2001), no.~1-2, 35--57.
+
+\bibitem[BG05]{BuGa05}
+Laurent Bus{\'e} and Andr{\'e} Galligo, \emph{Semi-implicit representations of
+  surfaces in {$\Bbb P^3$}, resultants and applications}, J. Symbolic Comput.
+  \textbf{39} (2005), no.~3-4, 317--329.
+  
+\bibitem[Bus01a]{Bus01}
+Laurent Bus{\'e}, \emph{{Residual resultant over the projective plane and the
+  implicitization problem}}, {Internation Symposium on Symbolic and Algebraic
+  Computing (ISSAC)} ACM (2001), Please, see the
+  errata.pdf attached file., pp.~48--55.
+
+\bibitem[Bus01b]{BusPhD}
+Laurent Bus{\'e}, \emph{{\'E}tude du r{\'e}sultant sur une vari{\'e}t{\'e}
+  alg{\'e}brique. phd thesis} (2001).
+
+\bibitem[Bus04]{Bus04}
+Laurent Bus{\'e}, \emph{Resultants of determinantal varieties}, J. Pure Appl.
+  Algebra \textbf{193} (2004), no.~1-3, 71--97.
+  
+\bibitem[Bus06]{Buse1}
+Laurent Bus{\'e}, \emph{Elimination theory in codimension one and
+  applications}, 1--47  (2006).
+
+\bibitem[Cha93]{Cha1}
+Marc Chardin, \emph{The resultant via a {K}oszul complex}, Computational
+  algebraic geometry (Nice, 1992), Progr. Math, vol. 109, Birkh{\"a}user
+  Boston, Boston, MA (1993), pp.~29--39.
+
+\bibitem[CLO98]{CLO98}
+David Cox, John Little, and Donal O'Shea, \emph{Using algebraic geometry},
+  Graduate Texts in Mathematics, vol. 185, Springer-Verlag, New York, (1998).
+
+\bibitem[Dem84]{Dem84}
+Michel Demazure, \emph{Une d\'efinition constructive du resultant}, Centre de
+  Math\'ematiques de l'{E}cole {P}olytechnique \textbf{2} (1984), no.~Notes
+  informelles du calcul formel 1984-1994, 0--23.
+
+\bibitem[EH00]{EH00}
+David Eisenbud and Joe Harris, \emph{{The geometry of schemes.}}, {Graduate
+  Texts in Mathematics. 197. New York, NY: Springer. x, 294 p.}, (2000).
+
+\bibitem[GKZ94]{GKZ94}
+Israel~M Gel{\cprime}fand, Mikhail~M Kapranov, and Andrei~V Zelevinsky,
+  \emph{Discriminants, resultants, and multidimensional determinants},
+  Mathematics: Theory \& Applications, Birkh{\"a}user Boston Inc, Boston, MA
+  (1994).
+
+\bibitem[GS]{M2}
+Daniel~R Grayson and Michael~E Stillman, \emph{Macaulay 2, a software system
+  for research in algebraic geometry.}, http://www.math.uiuc.edu/Macaulay2/.
+
+\bibitem[Jou91]{Jou91}
+Jean-Pierre Jouanolou, \emph{Le formalisme du r{\'e}sultant}, Adv. Math
+  \textbf{90} (1991), no.~2, 117--263.
+
+\bibitem[Jou95]{Jou95}
+Jean-Pierre Jouanolou, \emph{Aspects invariants de l'{\'e}limination}, Adv.
+  Math. \textbf{114} (1995),
+  pp.~1--174.
+
+\bibitem[Jou97]{Jou97}
+Jean-Pierre Jouanolou, \emph{Formes d'inertie et r\'esultant: un formulaire}, Adv.
+  Math. \textbf{126} (1997), no.~2, 119--250.
+  
+\bibitem[Mac02]{Mac02}
+F.S. Macaulay, \emph{Some formulae in elimination}, Proc. London Math. Soc.
+  \textbf{33} (1902), no.~1, 3--27.
+
+\bibitem[Mou96]{MB94mega}
+Bernard Mourrain, \emph{Enumeration problems in {G}eometry, {R}obotics and
+  {V}ision}, Prog. in Math. \textbf{143} (1996), 285--306.
+
+\end{thebibliography}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
