@@ -1084,6 +1084,7 @@ scan({detComplex, minorsComplex, listDetComplex}, fn -> document {
     SeeAlso => select({detComplex, minorsComplex, listDetComplex}, g -> g =!= fn)
      })
 
+
 ------------------------ \ documentation maxCol / ------------------------
 
 document {
@@ -1608,6 +1609,34 @@ document {
 
 }
 
+
+------------------------ \ regularityVar / ------------------------
+
+document { 
+    Key => {regularityVar, (regularityVar, List, Ideal)},
+    Headline => "computes the Castelnuovo-Mumford regularity of homogeneous ideals in terms of Betti numbers, with respect to some of the variables of the ring",     
+    Usage => "regularityVar(l,I)",     
+    
+    Inputs => {
+	"l" => List => {"list of variables of the polynomial ring R to take into account for computing the Castelnuovo-Mumford regularity"},
+	"I" => Ideal => {"ideal of a polynomial ring"}
+       	},
+       
+    PARA{}, TT "regularityVar", " computes the Castelnuovo-Mumford regularity of homogeneous ideals in a polynomial ring by computing the shifts and degrees of generatos in a minimal free resolution of the homogeneous ideal.",
+    PARA{}, "The list of variables ", TT "l", " contains the variables of the ring having degree 1. Those variables on the ring not in ", TT "l", " have automatically degree 0, as well as the the elements on the coefficient ring",
+             
+    	EXAMPLE {" R=QQ[a..i,x,y,z]",
+	"f1 = a*x+b*y+c*z",
+	"f2 = d*x+e*y+f*z",
+	"f3 = g*x+h*y+i*z",
+	"I = ideal(f1,f2,f3)",
+	"l = {x,y,z}",
+	"regularityVar (l,I)"
+      	},
+    
+    SeeAlso => {coefficientRing, resolution, res}
+     }
+
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 
@@ -1836,3 +1865,18 @@ assert(toString Res == "matrix {{-a_2*b_0+a_0*b_2, -a_4*b_0+a_0*b_4, -a_4*b_2+a_
 
 ///
 
+
+-- Test 11
+-- Checking the function detRes
+TEST ///
+
+R=QQ[a..i,x,y,z]
+f1 = a*x+b*y+c*z
+f2 = d*x+e*y+f*z
+f3 = g*x+h*y+i*z
+I = ideal(f1,f2,f3)
+l = {x,y,z}
+
+assert(regularityVar (l,I)==1)
+
+///
