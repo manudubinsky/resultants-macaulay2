@@ -801,9 +801,9 @@ document {
 	
 	PARA {}, "The package contains an implementation for computing determinant of free graded complexes, called ", TO2((detComplex), "detComplex"), ", with several derived methods:  ", TO2((listDetComplex), "listDetComplex"),", ", TO2((mapsComplex), "mapsComplex"),", and  ", TO2((minorsComplex), "minorsComplex"), ". This provides a method for producing universal formulas for any family of schemes, just by combining the ", TO2 {(resolution,Ideal),"resolution(Ideal)"}, " method with  ", TO2((detComplex), "detComplex"), ". In Section 2 determinants of free resolutions are treated, as well as a few examples. We recommend to see [Dem84, Jou95, GKZ94, Bus06] for more details on determinants of complexes in elimination theory.",
 
-	PARA {}, "The package also provides a method ", TO2((eliminationMatrix), "eliminationMatrix")," with different 'Strategies' for computing matrices and formulas for different resultants applicable on different families of polynomials, such as the Macaulay resultant (Macaulay) for generic homogeneous polynomials; residual resultant ('ciResidual' and 'CM2Residual') for generic polynomials having a non empty base locus scheme; determinantal resultant ('determinantal') for generic polynomial matrices of a given generic rank. Those resultants and their implementation are reviewed in Section 3 and for the theory behind the author can refer to [Jou91, Cha93, GKZ94, Jou95, Jou97, CLO98, BEM01, Bus01b, Bus06, Bus04].",
+	PARA {}, "The package also provides a method ", TO2((eliminationMatrix), "eliminationMatrix")," for computing matrices and formulas for different resultants applicable on different families of polynomials, such as the Macaulay resultant (Macaulay) for generic homogeneous polynomials; the residual resultant ('ciResidual' and 'CM2Residual') for generic polynomials having a non empty base locus scheme; the determinantal resultant ('determinantal') for generic polynomial matrices of a given generic rank. For the theory behind those resultants, the reader can refer to [Mac02, Jou91, Cha93, GKZ94, Jou97, CLO98, BEM00, BEM01, Bus01b, Bus06, Bus04].",
 
-	PARA {}, "The goal of this package is to provide universal formulas for elimination. The main advantage of this approach consists in the fact that we can provide formulas for any family of polynomials just by taking determinant to a free resolution. A direct consequence of a universal formula is that it is preserved by base change, this is, in particular, it commutes with specialization. A deep study of universal formulas for the image of a map of schemes can be seen in [EH00].",
+	PARA {}, "The goal of this package is to provide universal formulas for elimination. The main advantage of this approach consists in the fact that one can provide formulas for some families of polynomials just by taking determinant to a free resolution. A direct consequence of a universal formula is that it is preserved by base change, in particular it commutes with specialization. A deep study of universal formulas for the image of a map of schemes can be seen in [EH00].",
 
 	PARA {}, BOLD "Bibliography:", 
 
@@ -815,7 +815,7 @@ document {
 
     PARA {}, "[Bus01a] ", ITALIC "Laurent Busé",", Residual resultant over the projective plane and the implicitization problem, Internation Symposium on Symbolic and Algebraic Computing (ISSAC), ACM, (2001). Please, see the errata.pdf attached file., pp. 48–55.", 
 
-    PARA {}, "[Bus01b] ", ITALIC "Laurent Busé",", Étude du resultant sur une variété algébrique. phd thesis. (2001) ", 
+--    PARA {}, "[Bus01b] ", ITALIC "Laurent Busé",", Étude du resultant sur une variété algébrique. phd thesis. (2001) ", 
 
     PARA {}, "[Bus04] ", ITALIC "Laurent Busé",", Resultants of determinantal varieties, J.Pure Appl. Algebra193 (2004), no.1-3, 71–97.", 
 
@@ -829,19 +829,19 @@ document {
 
     PARA {}, "[EH00] ", ITALIC "David Eisenbud and Joe Harris",", The geometry of schemes., Graduate Texts in Mathematics. 197. New York, NY: Springer. x, 294 p., (2000). ", 
 
-    PARA {}, "[Eis95] ", ITALIC "David Eisenbud",", Commutative algebra, With a view toward algebraic geometry. Graduate Texts in Mathematics, vol. 150, Springer-Verlag, New York, (1995).",
+--    PARA {}, "[Eis95] ", ITALIC "David Eisenbud",", Commutative algebra, With a view toward algebraic geometry. Graduate Texts in Mathematics, vol. 150, Springer-Verlag, New York, (1995).",
     
     PARA {}, "[GKZ94] ", ITALIC "Israel M. Gel′fand, Mikhail M. Kapranov and Andrei V. Zelevinsky",", Discriminants, resultants, and multidimensional determinants, (1994). Mathematics: Theory & Applications, Birkh ̈auser Boston Inc, Boston, MA. ", 
 
     PARA {}, "[Jou91] ", ITALIC "Jean-Pierre Jouanolou",", Le formalisme du résultant, Adv. Math 90 (1991), no. 2, 117–263.", 
 
-    PARA {}, "[Jou95] ", ITALIC "Jean-Pierre Jouanolou",", Aspects invariants de l’élimination, vol. 114, 1995, pp. 1–174. ", 
+--    PARA {}, "[Jou95] ", ITALIC "Jean-Pierre Jouanolou",", Aspects invariants de l’élimination, vol. 114, 1995, pp. 1–174. ", 
 
     PARA {}, "[Jou97] ", ITALIC "Jean-Pierre Jouanolou",", Formes d’inertie et résultant: un formulaire, Adv. Math. 126 (1997), no. 2, 119–250.", 
 
     PARA {}, "[Mac02] ", ITALIC "Francis S. Macaulay",", Some formulae in elimination, Proc. London Math. Soc. 33 (1902), no. 1, 3–27.", 
     
-    PARA {}, "[Mou02] ", ITALIC "Bernard Mourrain",", Enumeration problems in Geometry, Robotics and Vision, Prog. in Math. 143 (1996), 285–306.",
+--   PARA {}, "[Mou02] ", ITALIC "Bernard Mourrain",", Enumeration problems in Geometry, Robotics and Vision, Prog. in Math. 143 (1996), 285–306.",
 }
 
 ------------------------ \ degHomPolMap / ------------------------
@@ -857,10 +857,10 @@ document {
 		"d" => ZZ => {"the degree in 'var' of the homogeneous strand of the map f (i.e.: R_d)"}
 	},
 	Outputs => {
-		"List" => List => {"a list {monomials, coefficients} of the coefficients and monomials of the morphism f (same arity of 'coeffs')"}
+		"List" => List => {"a list {monomials, coefficients} of the coefficients and monomials of the morphism f "}
 	},
 
-	PARA {}, "Let R be a polynomial ring in two groups of variables ", TEX "$R=S[X_1,...,X_r]$", " and ", TEX "$S=k[a_1,...,a_s]$", ". Here, ", TEX "$X_1,...,X_r$", " are called ", TT "v" ," and  ", TEX "$a_1,...,a_s$", " are called 'coefficients'. Let m be a line matrix ", TEX "$f_1,...,f_n$", ", where fi is an element of R which is homogeneous as a polynomial in the variables 'var', of degree di for all i in 'var'. The matrix 'm' defines a graded map of R-modules (of degree 0 in 'var') from ", TEX "$R(-d_1)+...+R(-d_n)$", " to R. In particular, looking on each strand d, we have a map of free S-modules of finite rank ", TEX "$f_d: R_{d-d_1}+...+R_{d-d_n} -> R_d$", " where ", TEX "$R_d$", " is the homogeneous part of degree d in 'var' of R.",
+	PARA {}, "Let R be a polynomial ring in two groups of variables ", TEX "$R=S[X_1,...,X_r]$", " and ", TEX "$S=k[a_1,...,a_s]$", ". Here, ", TEX "$X_1,...,X_r$", " are called ", TT "v" ," and  ", TEX "$a_1,...,a_s$", " are called 'coefficients'. Let m be a line matrix ", TEX "$f_1,...,f_n$", ", where fi is an element of R which is homogeneous as a polynomial in the variables 'var', of degree ", TEX "$di$", " for all i in 'var'. The matrix 'm' defines a graded map of R-modules (of degree 0 in 'var') from ", TEX "$R(-d_1)+...+R(-d_n)$", " to R. In particular, looking on each strand d, we have a map of free S-modules of finite rank ", TEX "$f_d: R_{d-d_1}+...+R_{d-d_n} -> R_d$", " where ", TEX "$R_d$", " is the homogeneous part of degree d in 'var' of R.",
 
 	PARA {}, "This function returns a sequence with two elements: first the list of monomials of degree d in 'var'; Second, the matrix f_d with entries in S in the base of monomials.",
 
@@ -907,7 +907,7 @@ document {
 
 	PARA {}, "This function calculates the maps of a graded ChainComplex with respect to a subset of the variables of the polynomial ring in a fixed degree.",
 	PARA {}, "The input ChainComplex needs to be an exact complex of free modules over a polynomial ring. The polynomial ring must contain the list ", TT "v", " as variables.",
-	PARA {}, "It is recommended not to defines rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see ", TO "flattenRing", " for passing from ", TEX "$R=QQ[x,y][a,b,c]$", " to ", TEX "QQ[x,y,a,b,c].",
+	PARA {}, "It is recommended not to define rings as R=QQ[x,y][a,b,c] when the variables to eliminate are '{x,y}'. In this case, see ", TO "flattenRing", " for passing from ", TEX "$R=QQ[x,y][a,b,c]$", " to ", TEX "QQ[x,y,a,b,c].",
 
 	EXAMPLE {" R=QQ[a,b,c,x,y] ",
 		" f1 = a*x^2+b*x*y+c*y^2 ",
@@ -1083,7 +1083,6 @@ scan({detComplex, minorsComplex, listDetComplex}, fn -> document {
 		
     SeeAlso => select({detComplex, minorsComplex, listDetComplex}, g -> g =!= fn)
      })
-
 
 ------------------------ \ documentation maxCol / ------------------------
 
@@ -1471,13 +1470,13 @@ document {
 
 	Inputs => {
 		"d" => List => {"a list of element in the ambient ring corresponding to the degrees of a system of polynomials ", TEX "$d_0,...,d_n$"},
-		"k" => List => {"a list of element in the ambient ring corresponding to the degrees of a complete intersection ", TEX "$k_1,...,k_m$", ", where m<n"},
+		"k" => List => {"a list of element in the ambient ring corresponding to the degrees of a complete intersection ", TEX "$k_1,...,k_m$", ", where m=<n"},
 	},
 	Outputs => {
 		"List" => List => {"a list of element consisting of a regularity index and partial degree of homogeneity"}
 	},
 
-	PARA {}, " Given a system of polynomials ", TEX "$f_0,...,f_n$", " of degree ", TEX "$d_0,...,d_n$", " that are contained in a complete intersection ", TEX "$g_1,...,g_m$", " of degree ", TEX "$k_1,...,k_m$", ", this function returns the regularity index used to form the matrix associated to the residual resultant over a complete intersection and then all the partial degree of this resultant with respect to the coefficients of ", TEX "$f_0,f_1,..,f_n$", ".",
+	PARA {}, " Given a system of polynomials ", TEX "$f_0,...,f_n$", " of degree ", TEX "$d_0,...,d_n$", " that are contained in a complete intersection ", TEX "$g_1,...,g_m$", " of degree ", TEX "$k_1,...,k_m$", ", this function returns the regularity index used to form the matrix associated to the residual resultant over a complete intersection and then all the partial degrees of this resultant with respect to the coefficients of ", TEX "$f_0,f_1,..,f_n$", ".",
 
 
 	EXAMPLE {" R=ZZ[d_0..d_3,k_1,k_2]",
@@ -1503,7 +1502,7 @@ document {
 		 ZZ => {"a regularity index to form the residual resultant-"}
 	},
 
-	PARA {}, " This function is similar to the first element in the list returned by the function ", TO2(ciResDeg,"ciResDeg")," but with arguments that are identical to the ones used with the function ", TO2(eliminationMatrix,"eliminationMatrix"), ".",
+	PARA {}, " This function is similar to the first element in the list returned by the function ", TO2(ciResDeg,"ciResDeg")," but with arguments that are identical to the ones used with the function ", TO2(eliminationMatrix,"eliminationMatrix")," using the Strategy ", TO2(CM2Residual,"CM2Residual") ,".",
 
 	EXAMPLE {" R=QQ[a_0,a_1,a_2,a_3,a_4,b_0,b_1,b_2,b_3,b_4,c_0,c_1,c_2,c_3,c_4,x,y,z]", 
 	"G=matrix{{z,x^2+y^2}}", 
@@ -1609,7 +1608,6 @@ document {
 
 }
 
-
 ------------------------ \ regularityVar / ------------------------
 
 document { 
@@ -1622,7 +1620,7 @@ document {
 	"I" => Ideal => {"ideal of a polynomial ring"}
        	},
        
-    PARA{}, TT "regularityVar", " computes the Castelnuovo-Mumford regularity of homogeneous ideals in a polynomial ring by computing the shifts and degrees of generatos in a minimal free resolution of the homogeneous ideal.",
+    PARA{}, TT "regularityVar", " computes the Castelnuovo-Mumford regularity of homogeneous ideals in a polynomial ring by computing the shifts and degrees of generators in a minimal free resolution of the homogeneous ideal.",
     PARA{}, "The list of variables ", TT "l", " contains the variables of the ring having degree 1. Those variables on the ring not in ", TT "l", " have automatically degree 0, as well as the the elements on the coefficient ring",
              
     	EXAMPLE {" R=QQ[a..i,x,y,z]",
@@ -1865,9 +1863,8 @@ assert(toString Res == "matrix {{-a_2*b_0+a_0*b_2, -a_4*b_0+a_0*b_4, -a_4*b_2+a_
 
 ///
 
-
 -- Test 11
--- Checking the function detRes
+-- Checking the function regularityVar
 TEST ///
 
 R=QQ[a..i,x,y,z]
