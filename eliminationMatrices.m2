@@ -201,8 +201,7 @@ maxCol(Matrix) := (Matrix,List) => options -> (M) -> (
         rm:=rankNE(M,options);
         i:=0;
         c:={};
-        
-        while #c<rm do (
+        while #c < rm do (
                 if rankNE(M_(c|{i}),options) == #(c|{i}) then c=c|{i};
                 i=i+1;
         );
@@ -220,8 +219,8 @@ maxCol(Matrix) := (Matrix,List) => options -> (M) -> (
 maxMinor  = method(Options => { Strategy => null })
 maxMinor(Matrix) := (Matrix,List) => options -> (M) -> (
         --Apply two times maxCol to obtain a maximal minor
-        --This is not very efficient...      
-        return (transpose (maxCol(transpose (maxCol(M,options))_0 ))_0 )
+        --This is not very efficient...  
+        return (transpose (maxCol(transpose (maxCol(M,options))_0,options ))_0 )
 );
 
 ---------------------------------------------------------------------------
@@ -771,10 +770,10 @@ eliminationMatrix(List, Matrix, Matrix) := Matrix => options -> (var, g, H) -> (
 		)
 	else if (getFamilyStrategy(options) == 1 or getFamilyStrategy(options) == 3 or getFamilyStrategy(options) == 4 ) then error "with this input, 'Strategy' keyword must be 'CM2Residual', 'ciResidual' or 'byResolution'"
 	-- at this point Strategy is null
-	else if rank target g == 1 and rank source g == 1 <= length var then return ciRes (var, g, H) 
-	else if rank target g == rank target H and (rank source g)+1 == rank target g then return cm2Res (var, g, H)
+--	else if (((rank target g) == 1) and ((rank source g) <= (length(var)))) then return ciRes (var, g, H) 
+--	else if ((rank target g) == (rank target H)) and (((rank source g)+1) == (rank target g)) then return cm2Res (var, g, H)
 	else (
-		print "The arguments do not satisfy the hypothesis for the strategies 'CM2Residual' and 'ciResidual'. You might want to use the strategy 'byResolution'.";
+		print "A strategy is required; please choose 'CM2Residual', 'ciResidual' or 'byResolution' depending on your inputs.";
 --		J := (ideal (g*H): ideal g);
 --		return (mapsComplex(regularityVar (var,J), var, res J))_0;
 		);
