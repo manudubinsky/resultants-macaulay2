@@ -97,8 +97,8 @@ The aim of this paper is to give an overview of the content of the \textit{Macau
 
 The package contains an implementation for computing determinant of free graded complexes, called \texttt{detComplex}, with several derived methods: \texttt{listDetComplex}, \texttt{mapsComplex} and \texttt{minorsComplex}. This provides a method for producing universal formulas for any family of schemes, just by combining the \texttt{resolution} M2 method with \texttt{detComplex}. In Section \ref{secDetComplex} determinants of free resolutions are treated, as well as a few examples. We recommend to see \cite{Dem84, Jou95, GKZ94, Buse1} for more details on determinants of complexes in elimination theory.
 
-The package also provides methods for computing matrices and formulas for different resultants applicable on different families of polynomials, such as the Macaulay resultant (\texttt{macRes}) for generic homogeneous polynomials; residual resultant (\texttt{ciRes}, \texttt{cm2Res}) for generic polynomials having a non empty base locus scheme;
-determinantal resultant  (\texttt{detRes}) for generic polynomial matrices of a given generic rank. Those resultants and their implementation are reviewed in Section \ref{secResultants}, and for the theory behind the reader can refer to \cite{Jou91, Cha1, GKZ94, Jou95, Jou97, CLO98, BEM01, BusPhD, Buse1, Bus04}.
+The package also provides methods for computing matrices and formulas for different resultants applicable on different families of polynomials, such as the Macaulay resultant (\texttt{eliminationMatrix} with the strategy \texttt{Macaulay}, or the function \texttt{macaulayFormula}) for generic homogeneous polynomials; residual resultant (\texttt{eliminationMatrix} with the strategy \texttt{ciResidual} or \texttt{CM2Residual}) for generic polynomials having a non empty base locus scheme;
+determinantal resultant  (\texttt{eliminationMatrix} with the strategy \texttt{determinantal}) for generic polynomial matrices of a given generic rank. Those resultants and their implementation are reviewed in Section \ref{secResultants}, and for the theory behind the reader can refer to \cite{Jou91, Cha1, GKZ94, Jou95, Jou97, CLO98, BEM01, BusPhD, Buse1, Bus04}.
 
 The goal of this package is to provide universal formulas for elimination. The main advantage of this approach consists in the fact that we can provide formulas for any family of polynomials just by taking determinant to a free resolution. A direct consequence of a universal formula is that it is preserved by base change, this is, in particular, it commutes with specialization. A deep study of universal formulas for the image of a map of schemes can be seen in \cite[Chapter V]{EH00}.
 
@@ -190,9 +190,13 @@ $\KK$,
 Consider the polynomials \texttt{f1 = a*x\^{}2+b*x*y+c*y\^{}2} and \texttt{f2 = 2*a*x+b*y} in the ring \texttt{R=QQ[a,b,c,x,y]}. 
 Denoting \texttt{M = matrix\{\{f1,f2\}\}}, the Macaulay resultant $\Res_{x,y}(f_1,f_2)$ can be computed as 
 \begin{verbatim}
->det(macRes(M,{x,y})_1)
+>det(eliminationMatrix({x,y},M,Strategy=>Macaulay))
 \end{verbatim}
-One can verify that the matrix \texttt{macRes(M,\{x,y\})\_1}
+(notice that the strategy is not necessary in this case). 
+One can verify that the matrix 
+\begin{verbatim}
+>eliminationMatrix({x,y},M)
+\end{verbatim}
 coincides with the Sylvester matrix 
 \begin{verbatim}
 >Syl=matrix{{a, 2*a, 0},{b, b, 2*a},{c, 0, b}}
@@ -202,13 +206,17 @@ coincides with the Sylvester matrix
 
 Now, since  \texttt{f1} and \texttt{f2} form a regular sequence in \texttt{R=QQ[a,b,c,x,y]}, and \texttt{M = matrix\{\{f1,f2\}\}}, the Koszul complex \texttt{koszul M} is a free resolution of $R/(f_1,f_2)$.
 
-Thus, we get that \texttt{(macRes(M,\{x,y\})\_1)} coincides with the right-most map of the Koszul complex \texttt{koszul M} in degree $2$ on the variables \texttt{\{x,y\}}. The list of maps of \texttt{koszul M} in degree $2$ on the variables \texttt{\{x,y\}} can be computed as
+Thus, we get that 
 \begin{verbatim}
->mapsComplex(koszul M,{x,y},2)	
+>eliminationMatrix({x,y},M)
+\end{verbatim}
+ coincides with the right-most map of the Koszul complex \texttt{koszul M} in degree $2$ on the variables \texttt{\{x,y\}}. The list of maps of \texttt{koszul M} in degree $2$ on the variables \texttt{\{x,y\}} can be computed as
+\begin{verbatim}
+>mapsComplex(2,{x,y}, koszul M)	
 \end{verbatim}
 and right-most means $0$-th position in the list, that is to say :
 \begin{verbatim}
->mapsComplex(koszul M,{x,y},2)_0	
+>mapsComplex(2,{x,y},koszul M)_0	
 \end{verbatim}
 \end{exmp}
 
@@ -350,16 +358,11 @@ y_{1}^{m-1}    & \cdots & y_{m}^{m-1} \\
 
 
 \begin{exmp}
- As an example we suppose that $n=3$ and $m=2$. Then we can obtain the critical degree and the multi-degree of the residual resultant with  \textit{Macaulay2}:
+ As an example we suppose that $n=3$ and $m=2$. Then we can obtain the critical degree and the multi-degree of the residual resultant :
 \begin{verbatim}
 >R=ZZ[d_0..d_4,k_1,k_2]:
->CiResDeg({d_0,d_1,d_2,d_3},{k_1,k_2})
+>ciResDeg({d_0,d_1,d_2,d_3},{k_1,k_2})
 \end{verbatim}   
-With {\tt Maple} we can obtain partial multi-degree: for instance the degree of the residual resultant in the coefficient of the polynomial $f_0$ is given by
-\begin{verbatim}
->bkmdegree([d1,d2,d3],[k1,k2]);
-\end{verbatim}   
-which returns $(-d_3 - d_2 - d_1 + k_2 + k_1) k_1 k_2 + d_1 d_2 d_3$.
 \end{exmp}
 
 We denote by $H$ the matrix $(h_{i,j})_{1\leq i\leq m,0 \le j \le n}$
@@ -405,10 +408,10 @@ of three circles in the plane. We would like to know when they intersect outside
 >H=matrix{{a_0*z+a_1*x+a_2*y,b_0*z+b_1*x+b_2*y,c_0*z+c_1*x+c_2*y}, 
           {a_3,b_3,c_3}}; 
 >F=G*H;  
->L=CiRes(G,H,{x,y,z});
->MaxCol L_1
+>L=eliminationMatrix({x,y,z},G,H)
+>(maxCol(L,Strategy=>Numeric))_0
 \end{verbatim}
-which returns:
+(the {\tt Numeric} strategy in {\tt maxCol} can also be chosen to be {\tt Exact} which is the default if not strategy is given) which returns:
 $$\begin{pmatrix}{{a}}_{{3}}&
       {{b}}_{{3}}&
       {{c}}_{{3}}&
@@ -452,7 +455,21 @@ whose determinant is the desired condition multiplied by $a_3(-a_2b_3+a_3b_2)$.
 Next example show how the right-most map of a free resolution does not coincide with the matrix we compute by applying directly the \texttt{CiRes} method, but they does coincide by reordering their columns and changing their signs.
 
 \begin{exmp}
-(Follows from Example \ref{exmpCiRes}) Take \texttt{F := G*H}. The matrix \texttt{L := CiRes(G,H,\{x,y,z\})} can not be computed as the right most map of any free resolution of \texttt{I := ideal F:ideal G} in degree \texttt{nu := ciResDegGH (G,H,\{x,y,z\})}, but, in this case, both matrices coincides by alternating their columns and changing their signs. This is, the matrix \texttt{(mapsComplex (res I, \{x,y,z\}, nu))\_0} has exactly the same columns as \texttt{L}, hence, the Complete Intersection Residual Resultant can be computed by means of any of these two matrices by taking gcd of maximal minors, or as the determinant of the complex \texttt{res I} with respect to the variables \texttt{\{x,y,z\}} in degree \texttt{2}.
+(Follows from Example \ref{exmpCiRes}) Take \texttt{F := G*H}. The matrix \texttt{L}  can not be computed as the right most map of any free resolution of \texttt{I := ideal F:ideal G} in degree \texttt{nu := ciResDegGH (\{x,y,z\},G,H)}, but, in this case, both matrices coincides by alternating their columns and changing their signs. This is, the matrix \texttt{((mapsComplex (nu,\{x,y,z\},res I))\_0} has exactly the same columns as \texttt{L}, hence, in this example the Complete Intersection Residual Resultant can be computed by means of any of these two matrices by taking gcd of maximal minors, or as the determinant of the complex \texttt{res I} with respect to the variables \texttt{\{x,y,z\}} in degree \texttt{2}.
+\end{exmp}
+
+Notice that this equality is not general. For instance, try the following example:
+\begin{exmp} \
+\begin{verbatim}
+>R = QQ[X,Y,Z,W,x,y,z];
+>F = matrix{{x*y^2,y^3,x*z^2,y^3+z^3}}
+>G = matrix{{y^2,z^2}};
+>M = matrix{{W,0,0},{0,W,0},{0,0,W},{-X,-Y,-Z}};
+>H = (F//G)*M
+>l = {x,y,z};
+>CmR1 = (eliminationMatrix (l,G,H, Strategy => CM2Residual))
+>CmR2 = (eliminationMatrix (l,G,H, Strategy => byResolution))	
+\end{verbatim} 
 \end{exmp}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -504,7 +521,7 @@ exactly the residual resultant.
 \end{thm}
 
 \begin{exmp}
- As a simple example we consider the residual resultant of three cubics in $\PP^2$ passing through the same three points. Here is the \textit{Macaulay2} code:
+ As a simple example we consider the residual resultant of three cubics in $\PP^2$ passing through the same three points. Here is the code:
 \begin{verbatim}
 >R=ZZ/32003[a_0..a_8,b_0..b_8,c_0..c_8,x_0,x_1,x_2]; 
 >G=matrix{{x_0*x_1,x_0*x_2,x_1*x_2}}; 
@@ -512,7 +529,7 @@ exactly the residual resultant.
 >l1=for i from 0 to 2 list b_(0+3*i)*x_0+b_(1+3*i)*x_1+b_(2+3*i)*x_2; 
 >l2=for i from 0 to 2 list c_(0+3*i)*x_0+c_(1+3*i)*x_1+c_(2+3*i)*x_2; 
 >H=matrix{l0,l1,l2}; 
->Cm2Res(G,H,{x_0,x_1,x_2})
+>eliminationMatrix({x_0,x_1,x_2},G,H,Strategy=>CM2Residual)
 \end{verbatim}
 We obtain a $10\times 10$ matrix which is too big to be printed here.
 \end{exmp}
@@ -533,7 +550,7 @@ $$\psi=\left(\begin{array}{cc}
       {{x}}_{{2}},
       {{x}}_{1} {{x}}_{{2}}-{{x}}_{0} {{x}}_{{3}},
 {{x}}_{{2}}^{2}-{{x}}_{1} {{x}}_{{3}}).$$
-Now we can use {\tt cm2Res} to compute the residual resultant matrix.
+From here, we can use {\tt eliminationMatrix} with the strategy {\tt CM2Residual} to compute the residual resultant matrix.
 \end{exmp}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -568,11 +585,12 @@ $$\Delta_{p,q}(s)=\det\left(
          \end{array}
   \right).$$
 
-\begin{exmp} Using \textit{Macaulay2} you can compute the multi-degree of the determinantal resultant corresponding to $m=3$, $n=2$, $r=1$:
+\begin{exmp} The computation of the multi-degree of the determinantal resultant corresponding to $m=3$, $n=2$, $r=1$ can be done as follows:
 \begin{verbatim}
->DetResDeg({d1,d2,d3},{k1,k2},1,ZZ[d1,d2,d3,k1,k2])
+>R=ZZ[d1,d2,d3,k1,k2]
+>detResDeg(1,{d1,d2,d3},{k1,k2},R)
 \end{verbatim}
-returns $\{{\text{d1}}+{\text{d2}}+{\text{d3}}-\text{k1}-2 \text{k2}-1,\{{\text{d2}}+{\text{d3}}-\text{k1}-\text{k2},{\text{d1}}+{\text{d3}}-\text{k1}-\text{k2},{\text{d1}}+{\text{d2}}-\text{k1}-\text{k2}\}\}$ giving the critical degree (see below) and the multi-degree of the determinantal resultant. 
+It returns $\{{\text{d1}}+{\text{d2}}+{\text{d3}}-\text{k1}-2 \text{k2}-1,\{{\text{d2}}+{\text{d3}}-\text{k1}-\text{k2},{\text{d1}}+{\text{d3}}-\text{k1}-\text{k2},{\text{d1}}+{\text{d2}}-\text{k1}-\text{k2}\}\}$ that gives the critical degree (see below) and the multi-degree of the determinantal resultant. 
 \end{exmp}
 
 
